@@ -86,8 +86,9 @@
     if (!pk.length) { const g = el('<a class="btn dark big" href="#/">활동 고르러 가기</a>'); p.appendChild(g); return; }
     const bar = el('<div class="packbar"></div>');
     bar.append(btn('차례대로 시작', 'dark big', () => location.hash = `#/a/${pk[0]}?pack`));
-    const printable = pk.map(actBy).filter(a => TOOLS[a.tool] && TOOLS[a.tool].pages && (a.tool !== 'guide' || a.sheet));
-    bar.append(btn(`활동지 ${printable.length}가지 한꺼번에 인쇄`, 'big', () => { if (!printable.length) return toast('인쇄할 활동지가 없어요'); printPages(printable.flatMap(a => TOOLS[a.tool].pages(a))); }));
+    const lp = a => window.LESSONS && LESSONS[a.n] && LESSONS[a.n].pages;
+    const printable = pk.map(actBy).filter(a => lp(a) || (TOOLS[a.tool] && TOOLS[a.tool].pages && (a.tool !== 'guide' || a.sheet)));
+    bar.append(btn(`활동지 ${printable.length}가지 한꺼번에 인쇄`, 'big', () => { if (!printable.length) return toast('인쇄할 활동지가 없어요'); printPages(printable.flatMap(a => lp(a) ? LESSONS[a.n].pages(a) : TOOLS[a.tool].pages(a))); }));
     bar.append(btn('모두 비우기', 'flat', () => { if (confirm('꾸러미를 모두 비울까요?')) { pk.splice(0); Store.save(); renderPack(); } }));
     p.appendChild(bar);
     const L = el('<div class="packlist"></div>');
@@ -131,7 +132,30 @@
       print(fn) { pr.hidden = false; pr.onclick = fn; },
       reload() { renderAct(n, fromPack); }
     };
-    try { TOOLS[a.tool](a, ctx); } catch (e) { console.error(e); stage.innerHTML = `<div class="center"><div class="qbig">화면을 여는 중 문제가 생겼어요.</div><p class="expl">${esc(e.message)}</p></div>`; }
+    const L = window.LESSONS && LESSONS[n];
+    let mode = L ? (Store.d('mode:' + n, 'lesson')) : 'tool';
+    const runTool = () => {
+      try { TOOLS[a.tool](a, ctx); } catch (e) { console.error(e); stage.innerHTML = `<div class="center"><div class="qbig">화면을 여는 중 문제가 생겼어요.</div><p class="expl">${esc(e.message)}</p></div>`; }
+    };
+    const runL = () => {
+      runLesson(a, stage, ctx);
+      if (L.pages) {
+        ctx.print(() => printPages(L.pages(a)));
+        const b1 = el('<button class="btn dark">활동지 인쇄 (아이들용)</button>'); b1.onclick = () => printPages(L.pages(a));
+        const b2 = el('<button class="btn">예시 정답지 인쇄 (선생님용)</button>'); b2.onclick = () => printPages(L.key(a));
+        const b3 = el('<button class="btn flat">활동지 미리 보기</button>'); b3.onclick = () => { stage.innerHTML = ''; const sb = el('<div class="stagebody"></div>'); stage.appendChild(sb); showPaper(sb, [...L.pages(a), ...L.key(a)]); };
+        ctx.opts.append(b1, b2, b3);
+      }
+      if (L.ppt) { const d = el(`<a class="btn" href="${L.ppt}" download>PPT 파일 받기 (Canva)</a>`); ctx.opts.append(d); }
+      ctx.opts.append(el('<p class="hint">전자칠판에서 화면 오른쪽을 누르거나 밀면 다음 장, 왼쪽을 누르면 이전 장으로 가요. 크게 보기 단추로 전체 화면을 써요.</p>'));
+    };
+    if (L) {
+      const ms = el(`<div class="modeseg"><button data-m="lesson">수업 슬라이드<small>${esc(L.plan)}</small></button><button data-m="tool">${esc(TOOL_KIND[a.tool])}<small>${a.tool === 'roles' ? '청소 구역 뽑기와 완료 체크' : '활동 도구'}</small></button></div>`);
+      $('.aside', v).insertBefore(ms, $('.opts', v));
+      const set = m => { mode = m; Store.set('mode:' + n, m); $$('button', ms).forEach(b => b.classList.toggle('on', b.dataset.m === m)); clearTimers(); stage.innerHTML = ''; ctx.opts.innerHTML = ''; pr.hidden = true; m === 'lesson' ? runL() : runTool(); };
+      $$('button', ms).forEach(b => b.onclick = () => set(b.dataset.m));
+      set(mode);
+    } else runTool();
   }
 
   /* 우리 반 정보 */
@@ -158,8 +182,8 @@
   function route() {
     app.style.cssText = '';
     const h = location.hash;
-    const m = h.match(/^#\/a\/(\d+)(\?pack)?/);
-    if (m) return renderAct(+m[1], !!m[2]);
+    const m = h.match(/^#\/a\/(\d+)/);
+    if (m) return renderAct(+m[1], /[?&]pack/.test(h));
     if (h.startsWith('#/pack')) return renderPack();
     renderHome();
   }

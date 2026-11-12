@@ -102,11 +102,10 @@
     function getCustom(key, def) { const txt = Store.d('custom:' + a.n + key, def); return txt.split('\n').map(l => l.split('|').map(s => s.trim())).filter(r => r[0]); }
 
     /* 학습 퀴즈 상태 */
-    let rv = { level: 1, streak: 0, right: 0, total: 0, subj: Store.d('rv:subj:' + a.n, 'mix'), cur: null, answered: false };
+    const g0 = Math.min(6, Math.max(1, parseInt(Store.get().grade, 10) || 2));
+    let rv = { level: 1, streak: 0, right: 0, total: 0, grade: Store.d('rv:grade:' + a.n, g0), subj: Store.d('rv:subj:' + a.n, 'mix'), cur: null, answered: false };
     function nextMC() {
-      const s = rv.subj === 'mix' ? pickOne(['math', 'math', 'kor', 'life']) : rv.subj;
-      const L = Math.min(rv.level, s === 'math' ? 4 : 3);
-      rv.cur = s === 'math' ? mathMC(L) : s === 'kor' ? bankMC(BANK.korean, L, '국어') : bankMC(BANK.life, L, '통합');
+      rv.cur = makeReview(rv.grade, rv.subj, rv.level);
       rv.answered = false;
     }
 
@@ -145,12 +144,12 @@
       if (!rv.cur) nextMC();
       const q = rv.cur, w = el(`<div class="center"></div>`);
       const turnTxt = mode === 'battle' ? `<div class="qcount" style="font-size:22px;color:var(--ink)">${score.turn() + 1}모둠 차례예요</div>` : `<div class="qcount">맞힌 문제 ${rv.right} / ${rv.total}</div>`;
-      w.innerHTML = `${turnTxt}<span class="lvl">${[1, 2, 3, 4].map(k => `<i class="${k <= rv.level ? 'on' : ''}"></i>`).join('')} ${esc(q.s)} ${rv.level}단계</span>${q.svg || ''}<div class="qbig" style="font-size:clamp(28px,3.8vw,54px)">${esc(q.q)}</div><div class="choices">${q.o.map((o, k) => `<button class="choice" data-o="${esc(o)}"><span class="k">${k + 1}</span>${esc(o)}</button>`).join('')}</div><div class="ctrl"><button class="btn big" data-n>다음 문제 ${ICON.next}</button></div>`;
+      w.innerHTML = `${turnTxt}<span class="lvl">${[1, 2, 3].map(k => `<i class="${k <= rv.level ? 'on' : ''}"></i>`).join('')} ${rv.grade}학년 ${esc(q.s)} ${rv.level}단계</span>${q.svg || ''}<div class="qbig" style="font-size:clamp(28px,3.8vw,54px)">${fracHTML(q.q)}</div><div class="choices">${q.o.map((o, k) => `<button class="choice" data-o="${esc(o)}"><span class="k">${k + 1}</span>${fracHTML(o)}</button>`).join('')}</div><div class="ctrl"><button class="btn big" data-n>다음 문제 ${ICON.next}</button></div>`;
       body.appendChild(w);
       $$('.choice', w).forEach(b => b.onclick = () => {
         if (rv.answered) return;
         const ok = b.dataset.o === q.a;
-        if (ok) { rv.answered = true; b.classList.add('right'); beep('ok'); rv.right++; rv.total++; rv.streak++; if (rv.streak >= 2) { rv.level = Math.min(4, rv.level + 1); rv.streak = 0; } if (mode === 'battle') score.add(score.turn(), 1); $$('.choice', w).forEach(x => x.disabled = true); }
+        if (ok) { rv.answered = true; b.classList.add('right'); beep('ok'); rv.right++; rv.total++; rv.streak++; if (rv.streak >= 2) { rv.level = Math.min(3, rv.level + 1); rv.streak = 0; } if (mode === 'battle') score.add(score.turn(), 1); $$('.choice', w).forEach(x => x.disabled = true); }
         else {
           b.classList.add('wrong'); b.disabled = true; beep('no');
           if (mode === 'battle') { score.nextTurn(); $('.qcount', w).textContent = `${score.turn() + 1}모둠에게 기회가 넘어갔어요`; }
@@ -170,9 +169,12 @@
     let curF = 0;
     if (['chosung', 'creative', 'golden'].includes(mode)) ctx.opts.append(field('단계', seg([[0, '쉬움→어려움'], [1, '쉬움'], [2, '보통'], [3, '어려움']], 0, v => { curF = v; build(v); show(); })));
     if (mode === 'review' || mode === 'battle') {
-      ctx.opts.append(field('과목', seg([['mix', '섞어서'], ['math', '수학'], ['kor', '국어'], ['life', '통합 교과']], rv.subj, v => { rv.subj = v; Store.set('rv:subj:' + a.n, v); nextMC(); show(); })));
-      ctx.opts.append(field('시작 단계', seg([[1, '1'], [2, '2'], [3, '3'], [4, '4']], 1, v => { rv.level = v; nextMC(); show(); })));
-      ctx.opts.append(el('<p class="hint">수학 문제는 매번 새로 만들어져요. 두 번 연속 맞히면 단계가 올라가요.</p>'));
+      const subjBox = el('<div></div>');
+      const drawSubj = () => { subjBox.innerHTML = ''; if (!REVIEW_SUBJ(rv.grade).some(x => x[0] === rv.subj)) rv.subj = 'mix'; subjBox.appendChild(field('과목', seg(REVIEW_SUBJ(rv.grade), rv.subj, v => { rv.subj = v; Store.set('rv:subj:' + a.n, v); nextMC(); show(); }))); };
+      ctx.opts.append(field('학년', seg([1, 2, 3, 4, 5, 6].map(g => [g, g + '학년']), rv.grade, v => { rv.grade = v; Store.set('rv:grade:' + a.n, v); rv.level = 1; drawSubj(); nextMC(); show(); })), subjBox);
+      drawSubj();
+      ctx.opts.append(field('시작 단계', seg([[1, '1'], [2, '2'], [3, '3']], 1, v => { rv.level = v; nextMC(); show(); })));
+      ctx.opts.append(el('<p class="hint">2022 개정 교육과정 기준이에요. 수학은 학년별로 매번 새 문제가 나오고, 국어·사회·과학·통합은 학년군(1~2, 3~4, 5~6) 문제예요. 두 번 연속 맞히면 단계가 올라가요.</p>'));
     }
     if (mode === 'custom' || mode === 'golden') {
       const key = mode === 'golden' ? 'golden' : 'custom';
@@ -274,8 +276,11 @@
 
   /* ─── 빙고 ─── */
   T.bingo = function (a, ctx) {
-    const st = ctx.stage, key = 'pool:' + a.n;
-    const getPool = () => Store.d(key, BINGO[a.pool].join('\n')).split('\n').map(s => s.trim()).filter(Boolean);
+    const st = ctx.stage;
+    const gr = parseInt(Store.get().grade, 10) || 2;
+    const poolName = a.pool === 'concept' ? (gr <= 2 ? 'concept' : gr <= 4 ? 'concept2' : 'concept3') : a.pool;
+    const key = 'pool:' + a.n + (a.pool === 'concept' ? ':' + poolName : '');
+    const getPool = () => Store.d(key, BINGO[poolName].join('\n')).split('\n').map(s => s.trim()).filter(Boolean);
     const body = el('<div class="stagebody"></div>'); st.appendChild(body);
     let size = a.mission ? 4 : 4;
     const t = ta(getPool().join('\n'), 8);
@@ -337,7 +342,12 @@
     const MC = ['#E2456B', '#F2672A', '#D99A00', '#13A36E', '#2B78D6', '#7A52D9'];
     const inp = el(`<div class="wallinput">${mode === 'timeline' ? `<select class="field" style="width:100px">${MON.map(m => `<option>${m}</option>`).join('')}</select>` : ''}<input placeholder="${{ timeline: '이달에 있었던 일 (예: 운동회에서 줄다리기 우승)', tree: '친구에게 전하는 칭찬이나 고마운 말', wish: '2027년 나의 소망', mailbox: '칭찬하고 싶은 친구와 칭찬할 점', dict: '기억에 남는 따뜻한 말' }[mode]}">${mode !== 'timeline' ? '<input placeholder="누가 (안 써도 돼요)" style="flex:0 0 180px">' : ''}<button class="btn dark">넣기</button></div>`);
     st.appendChild(inp);
+    inp.hidden = !Store.d('wallType:' + a.n, false);
     const [txt, who] = $$('input', inp), sel = $('select', inp);
+    if (a.sheet) { const pb = el('<button class="btn dark">손으로 쓰는 종이 쪽지 인쇄</button>'); pb.onclick = () => printPages([buildSheet(a, a.sheet)]); ctx.opts.append(pb, el('<p class="hint">아이들은 종이 쪽지에 손으로 써요. 다 쓴 쪽지는 게시판에 붙이거나, 선생님이 아래 단추로 화면에 옮겨 적어 함께 볼 수 있어요.</p>')); }
+    const tg = el(`<button class="btn">${inp.hidden ? '선생님이 화면에 옮겨 적기' : '옮겨 적기 칸 숨기기'}</button>`);
+    tg.onclick = () => { inp.hidden = !inp.hidden; Store.set('wallType:' + a.n, !inp.hidden); tg.textContent = inp.hidden ? '선생님이 화면에 옮겨 적기' : '옮겨 적기 칸 숨기기'; if (!inp.hidden) txt.focus(); };
+    ctx.opts.append(tg);
     const add = () => { if (!txt.value.trim()) return; items.push({ t: txt.value.trim(), w: who ? who.value.trim() : '', m: sel ? sel.value : '', r: 0, id: Date.now() }); Store.save(); txt.value = ''; if (who) who.value = ''; beep('pop'); draw(true); txt.focus(); };
     $('button', inp).onclick = add; txt.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) add(); };
     const del = i => { if (confirm(`"${items[i].t}" 을(를) 지울까요?`)) { items.splice(i, 1); Store.save(); draw(); } };
@@ -353,7 +363,7 @@
           const tg = el(`<div class="tag ${isNew && i === items.length - 1 ? 'new' : ''}" style="left:calc(${p[0] + jit}% - 75px);top:calc(${p[1] + jit}% + 24px);background:${cols[i % cols.length]};animation-delay:${-(i * .7)}s">${esc(it.t)}${it.w ? `<span class="who">${esc(it.w)}</span>` : ''}</div>`);
           tg.onclick = () => del(i); area.appendChild(tg);
         });
-        if (!items.length) area.insertAdjacentHTML('beforeend', `<div class="center" style="position:absolute;inset:0;pointer-events:none"><div class="qbig" style="font-size:30px;background:rgba(255,255,255,.8);padding:10px 24px;border-radius:14px">아래 칸에 적으면 나무에 쪽지가 걸려요</div></div>`);
+        if (!items.length) area.insertAdjacentHTML('beforeend', `<div class="center" style="position:absolute;inset:0;pointer-events:none"><div class="qbig" style="font-size:30px;background:rgba(255,255,255,.8);padding:10px 24px;border-radius:14px">아이들이 손으로 쓴 쪽지를 선생님이 옮겨 적으면 여기에 걸려요</div></div>`);
       }
       if (mode === 'timeline') {
         const g = el('<div class="timeline"></div>');
@@ -387,7 +397,6 @@
       else p.insertAdjacentHTML('beforeend', `<div style="columns:2;column-gap:28px;font-size:17px">${items.slice().sort((x, y) => mode === 'dict' ? x.t.localeCompare(y.t, 'ko') : 0).map(x => `<div style="break-inside:avoid;padding:8px 0;border-bottom:1.5px dashed #CDD5E1"><b>${esc(x.t)}</b>${x.w ? `<div style="font-size:14px;color:#56627A">${esc(x.w)}</div>` : ''}</div>`).join('')}</div>`);
       printPages([p]);
     });
-    if (a.sheet) { const b = el('<button class="btn">종이 쪽지 인쇄</button>'); b.onclick = () => printPages([buildSheet(a, a.sheet)]); ctx.opts.append(b); }
   };
 
   /* ─── 비밀 응원 천사 ─── */
@@ -605,10 +614,10 @@
       const hrs = [rint(1, 9), rint(1, 9), rint(1, 9)];
       rooms = [
         { t: '규칙의 방', q: `빈칸에 들어갈 수를 차례로 자물쇠에 돌려요.<br><b style="font-size:1.25em">${p1.join(', ')}, ㉠ &nbsp; / &nbsp; ${p2.join(', ')}, ㉡의 일의 자리 &nbsp; / &nbsp; ${p3.join(', ')}, ㉢</b>`, code: [d1 % 10, d2, d3], hint: '앞의 수에서 얼마씩 커지거나 작아지는지 보세요.' },
-        { t: '초성의 방', q: `초성을 보고 낱말을 써요.<br><b class="qhuge" style="font-size:1.8em">${chosung(w[0])}</b><br><span style="font-size:.8em;color:var(--sub)">${w[1]}</span>`, word: w[0], hint: `첫 글자는 "${w[0][0]}" 이에요.` },
+        { t: '초성의 방', q: `초성을 보고 글자 조각을 차례로 눌러요.<br><b class="qhuge" style="font-size:1.8em">${chosung(w[0])}</b><br><span style="font-size:.8em;color:var(--sub)">${w[1]}</span>`, word: w[0], hint: `첫 글자는 "${w[0][0]}" 이에요.` },
         { t: '시계의 방', q: '세 시계가 가리키는 "시"를 차례로 돌려요.', clocks: hrs, code: hrs, hint: '짧은바늘이 가리키는 숫자를 보세요.' },
-        { t: '거울의 방', q: `거울에 비친 글자예요. 바르게 읽어 써요.<br><span class="mirror qhuge" style="font-size:1.8em">${mi}</span>`, word: mi, hint: '종이에 따라 써서 뒤집어 보세요.' },
-        { t: '마지막 문', q: '모은 글자 조각을 바른 순서로 이어 써요.', word: PIECES.join(''), final: 1, hint: `첫 글자는 "${PIECES[0]}" 이에요.` }
+        { t: '거울의 방', q: `거울에 비친 글자예요. 바르게 읽고 글자 조각을 눌러요.<br><span class="mirror qhuge" style="font-size:1.8em">${mi}</span>`, word: mi, hint: '종이에 따라 써서 뒤집어 보세요.' },
+        { t: '마지막 문', q: '모은 글자 조각을 바른 순서로 눌러요.', word: PIECES.join(''), final: 1, hint: `첫 글자는 "${PIECES[0]}" 이에요.` }
       ];
       cur = 0; hints = 0;
     }
@@ -627,7 +636,20 @@
         const v = [0, 0, 0]; const ds = el('<div class="dials"></div>');
         v.forEach((_, k) => { const d = el(`<div class="dial"><button aria-label="올리기">${ICON.up}</button><div class="dv">0</div><button aria-label="내리기">${ICON.down}</button></div>`); const [u, dn] = $$('button', d); const set = x => { v[k] = (x + 10) % 10; $('.dv', d).textContent = v[k]; d.classList.remove('roll'); void d.offsetWidth; d.classList.add('roll'); beep('tick'); }; u.onclick = () => set(v[k] + 1); dn.onclick = () => set(v[k] - 1); ds.appendChild(d); });
         lock.appendChild(ds); get = () => v.join('') === r.code.join('');
-      } else { const inp = el('<input class="wordlock" placeholder="여기에 써요">'); lock.appendChild(inp); setTimeout(() => inp.focus(), 50); inp.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) $('[data-o]', body).click(); }; get = () => inp.value.replace(/\s/g, '') === r.word; }
+      } else {
+        const POOL = '눈사람겨울방학썰매장갑호빵세배떡국목도리크리스마스붕어빵즐거운신나는행복한새해꽃';
+        const need = Array.from(r.word);
+        const extra = shuffle(Array.from(new Set(Array.from(POOL))).filter(c => !need.includes(c))).slice(0, Math.max(3, 8 - need.length));
+        const tiles = r.final ? shuffle(need) : shuffle(need.concat(extra));
+        let typed = [];
+        const w = el(`<div style="display:flex;flex-direction:column;align-items:center;gap:14px"><div class="wordlock" data-shown style="min-height:72px">&nbsp;</div><div class="pieces" data-tiles style="flex-wrap:wrap;justify-content:center;max-width:760px"></div><button class="btn big" data-back>한 글자 지우기</button></div>`);
+        const shown = $('[data-shown]', w), tb = $('[data-tiles]', w);
+        const paint = () => { shown.textContent = typed.map(k => tiles[k]).join('') || ' '; $$('button', tb).forEach((b, k) => b.disabled = typed.includes(k)); };
+        tiles.forEach((ch, k) => { const b = el(`<button class="piece got" style="cursor:pointer">${esc(ch)}</button>`); b.onclick = () => { if (typed.length < need.length) { typed.push(k); beep('tick'); paint(); } }; tb.appendChild(b); });
+        $('[data-back]', w).onclick = () => { typed.pop(); paint(); };
+        lock.appendChild(w); paint();
+        get = () => typed.map(k => tiles[k]).join('') === r.word;
+      }
       $('[data-o]', body).onclick = () => {
         if (get()) { beep('fan'); cur++; if (cur >= rooms.length) return win(); confetti(st); $('[data-msg]', body).textContent = `문이 열렸어요! 글자 조각 "${PIECES[cur - 1]}"을(를) 얻었어요.`; setTimeout(room, 1300); }
         else { beep('no'); $('[data-msg]', body).textContent = '아직 안 열려요. 다시 생각해 봐요.'; lock.animate([{ transform: 'translateX(-10px)' }, { transform: 'translateX(10px)' }, { transform: 'none' }], 300); }
@@ -681,7 +703,7 @@
     const c = monthCells(m);
     const p = el(`<div class="page" style="${catVars(catOf(a))}"></div>`);
     p.innerHTML = `<div class="box" style="height:330px"><span class="bl">${m}월의 그림</span></div>
-      <div style="display:flex;align-items:flex-end;gap:16px"><b style="font-size:76px;line-height:.9;color:var(--c)">${m}</b><div style="font-size:24px;font-weight:700;padding-bottom:6px">월 &nbsp;<span style="font-size:18px;color:#56627A;font-weight:400">2027</span></div><div style="margin-left:auto;font-size:15px;color:#56627A;padding-bottom:6px">이름 __________</div></div>
+      <div style="display:flex;align-items:flex-end;gap:16px"><b style="font-size:76px;line-height:.9;color:var(--c)">${m}</b><div style="font-size:24px;font-weight:700;padding-bottom:6px">월 &nbsp;<span style="font-size:18px;color:#56627A;font-weight:400">2027</span></div><div style="margin-left:auto;display:flex;align-items:flex-end;gap:10px"><div style="text-align:right;padding-bottom:6px"><div style="font-size:19px;font-weight:700;color:#D2302C">2027 정미년, 붉은 양의 해</div>${m <= 2 ? '<div style="font-size:12px;color:#8A95A8">음력 설날(2월 7일)부터 정미년이 시작돼요</div>' : ''}<div style="font-size:15px;color:#56627A;margin-top:4px">이름 __________</div></div><img src="img/sheep.png" alt="" style="height:96px"></div></div>
       <table style="width:100%;border-collapse:collapse;table-layout:fixed;flex:1"><tr>${DOW.map((d, k) => `<th style="padding:6px;font-size:16px;border-bottom:2.5px solid #1F2B45;color:${k === 0 ? '#C9305A' : k === 6 ? '#2366C2' : '#1F2B45'}">${d}</th>`).join('')}</tr>
       ${Array.from({ length: c.length / 7 }, (_, r) => `<tr>${c.slice(r * 7, r * 7 + 7).map((d, k) => { const hn = d && HOLI2027[m + '-' + d]; return `<td style="border:1.5px solid #CDD5E1;vertical-align:top;padding:5px 7px;height:${c.length > 35 ? 74 : 88}px">${d ? `<div style="font-size:20px;font-weight:700;color:${hn || k === 0 ? '#C9305A' : k === 6 ? '#2366C2' : '#1F2B45'}">${d}</div>${hn ? `<div style="font-size:11.5px;color:#C9305A;line-height:1.2">${hn}</div>` : ''}` : ''}</td>`; }).join('')}</tr>`).join('')}</table>
       <div class="lines"><div class="blk-label">이달의 목표</div><div class="ln"></div></div>
@@ -691,7 +713,7 @@
   T.calendar = function (a, ctx) {
     const st = ctx.stage; let sel = 1;
     const wrap = el('<div style="display:grid;grid-template-columns:1fr 1fr;height:100%;min-height:0"></div>'); st.appendChild(wrap);
-    const left = el('<div class="yeargrid" style="grid-template-columns:repeat(3,1fr);align-content:start"></div>'), right = el('<div style="display:flex;min-height:0"></div>');
+    const left = el('<div class="yeargrid" style="grid-template-columns:repeat(3,1fr);align-content:start"><div style="grid-column:1/4;display:flex;align-items:center;gap:16px;background:#FFE9E4;border-radius:14px;padding:8px 16px"><img src="img/sheep.png" alt="" style="height:84px"><div><b style="font-size:24px;color:#D2302C">2027년은 붉은 양의 해</b><div class="hint">정미년: "정"은 붉은색, "미"는 양을 뜻해요. 음력 설날(2월 7일)부터 시작돼요.</div></div></div></div>'), right = el('<div style="display:flex;min-height:0"></div>');
     wrap.append(left, right);
     for (let m = 1; m <= 12; m++) {
       const c = monthCells(m);

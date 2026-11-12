@@ -1,7 +1,7 @@
 /* 공통 도구: 저장, 그리기, 타이머, 점수판, 인쇄 */
 (function () {
   const KEY = 'hakgimal-kit-v1';
-  let mem = { pack: [], roster: [], grade: '2', cls: '', teacher: '', school: '', data: {} };
+  let mem = { pack: [], roster: [], grade: '', cls: '', teacher: '', school: '', data: {} };
   try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) mem = Object.assign(mem, s); } catch (e) {}
   const Store = {
     get: () => mem,

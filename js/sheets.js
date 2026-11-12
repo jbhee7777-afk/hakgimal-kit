@@ -7,7 +7,7 @@
 
   window.nameLine = function () {
     const m = Store.get();
-    return `<div class="pname">${esc(m.grade || '  ')}학년 ${m.cls ? esc(m.cls) : '<i style="width:34px"></i>'}반 <i style="width:34px"></i>번 이름 <i></i></div>`;
+    return `<div class="pname">${m.grade ? esc(m.grade) : '<i style="width:34px"></i>'}학년${m.cls ? esc(m.cls) : '<i style="width:34px"></i>'}반 <i style="width:34px"></i>번 이름 <i></i></div>`;
   };
 
   window.pageFrame = function (a, title, guide, opt) {
@@ -104,7 +104,7 @@
     },
     cover: () => `<div style="flex:1;border:3px solid var(--c);border-radius:20px;position:relative;display:flex;flex-direction:column;align-items:center;padding:28px">
       <svg viewBox="0 0 600 180" style="width:560px;height:168px"><text x="300" y="150" text-anchor="middle" font-family="Miso" font-weight="700" font-size="190" fill="none" stroke="var(--c)" stroke-width="4" letter-spacing="8">2027</text></svg>
-      <div style="font-size:18px;color:#56627A">${ed('2027년은 정미년, 양의 해예요. 숫자 안을 색칠하고 아래에 새해 그림을 그려요.')}</div>
+      <div style="font-size:18px;color:#56627A">${ed('2027년은 정미년, 붉은 양의 해예요. 숫자 안을 색칠하고 아래에 새해 그림을 그려요.')}</div><img src="img/sheep.png" alt="" style="position:absolute;right:26px;top:150px;height:150px">
       <div style="flex:1;width:100%;border:1.5px dashed #9AA6B8;border-radius:14px;margin-top:20px"></div>
       <div style="font-size:22px;font-weight:700;margin-top:18px">__________ 의 2027 달력</div></div>`,
     poster: () => `<div style="height:70px;border:2.5px solid var(--c);border-radius:14px;display:grid;place-items:center;font-size:18px;color:#8A95A8">포스터 제목을 크게 써요</div>
@@ -133,7 +133,7 @@
     stars: b => `<div class="box" style="height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px"><span class="bl">${esc(b.label)}</span><div style="display:flex;gap:6px">${Array(5).fill('<svg viewBox="0 0 24 24" style="width:54px;height:54px"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z" fill="none" stroke="#E3A400" stroke-width="1.5" stroke-linejoin="round"/></svg>').join('')}</div><span style="font-size:14px;color:#8A95A8">마음에 든 만큼 색칠해요</span></div>`,
     minibook: () => `<div style="position:absolute;left:50%;top:50%;width:1010px;height:700px;transform:translate(-50%,-50%) rotate(90deg);display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;border:2px solid #9AA6B8">
       ${[['5쪽', 1], ['4쪽', 1], ['3쪽', 1], ['2쪽', 1], ['6쪽', 0], ['7쪽', 0], ['뒤표지', 0], ['앞표지', 0]].map(([t, flip], i) => `<div style="border-right:${i % 4 < 3 ? '2px dashed #B8C1CF' : '0'};border-bottom:${i < 4 ? (i === 1 || i === 2 ? '3px solid #1F2B45' : '2px dashed #B8C1CF') : '0'};padding:18px;display:flex;flex-direction:column;${flip ? 'transform:rotate(180deg);' : ''}">
-        <b style="color:var(--c);font-size:16px">${t}</b>${t === '앞표지' ? `<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px"><div style="font-size:26px;font-weight:700">${ed('나의 2학년 미니 북')}</div><div style="font-size:15px;color:#56627A">과목: ________</div><div style="font-size:15px;color:#56627A">이름: ________</div></div>` : t === '뒤표지' ? '<div style="flex:1;display:flex;align-items:flex-end;font-size:14px;color:#8A95A8">이 책을 읽은 친구 사인</div>' : `<div style="flex:1;border:1.5px dashed #E4E9F1;border-radius:8px;margin:8px 0"></div><div class="lines">${L(3)}</div>`}</div>`).join('')}</div>
+        <b style="color:var(--c);font-size:16px">${t}</b>${t === '앞표지' ? `<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px"><div style="font-size:26px;font-weight:700">${ed('나의 한 해 미니 북')}</div><div style="font-size:15px;color:#56627A">과목: ________</div><div style="font-size:15px;color:#56627A">이름: ________</div></div>` : t === '뒤표지' ? '<div style="flex:1;display:flex;align-items:flex-end;font-size:14px;color:#8A95A8">이 책을 읽은 친구 사인</div>' : `<div style="flex:1;border:1.5px dashed #E4E9F1;border-radius:8px;margin:8px 0"></div><div class="lines">${L(3)}</div>`}</div>`).join('')}</div>
       <div style="position:absolute;left:14px;bottom:12px;font-size:12px;color:#8A95A8;writing-mode:vertical-rl">가운데 굵은 선만 가위로 자르고, 점선을 따라 접어요.</div>`
   };
 
