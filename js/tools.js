@@ -819,8 +819,8 @@
     ctx.opts.append(field('조각 수', seg([['2x2', '4조각'], ['3x3', '9조각'], ['4x4', '16조각'], ['4x6', '24조각'], ['5x6', '30조각']], '3x3', v => { [cols, rows] = v.split('x').map(Number); draw(); })));
     const nb = el('<button class="btn">다른 눈꽃 무늬</button>'); nb.onclick = () => { seed = rint(1, 9999); Store.set('mseed', seed); upl = null; draw(); };
     const fi = el('<input type="file" accept="image/*">'); fi.onchange = () => { const f = fi.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { upl = r.result; draw(); }; r.readAsDataURL(f); };
-    const scenes = [['img/scene/scene1.jpg', '눈사람 마을'], ['img/scene/scene2.jpg', '썰매 언덕'], ['img/scene/scene3.jpg', '겨울 숲 동물'], ['img/scene/scene4.jpg', '스케이트 호수'], ['img/scene/scene5.jpg', '설날 한옥 마당'], ['', '눈꽃 무늬']];
-    upl = Store.d('scene', 'img/scene/scene1.jpg') || null;
+    const scenes = [['img/scene/w1.jpg', '눈사람 마을'], ['img/scene/w2.jpg', '썰매 언덕'], ['img/scene/w3.jpg', '숲속 모닥불'], ['img/scene/w4.jpg', '스케이트 호수'], ['img/scene/w5.jpg', '설날 한옥 마당'], ['', '눈꽃 무늬']];
+    upl = Store.d('scene', 'img/scene/w1.jpg'); if (upl && !scenes.some(s => s[0] === upl)) upl = 'img/scene/w1.jpg'; upl = upl || null;
     ctx.opts.prepend(field('겨울 풍경 고르기', seg(scenes, upl || '', v => { upl = v || null; Store.set('scene', v); draw(); })));
     ctx.opts.append(nb, field('내 그림(선 그림) 넣기', fi), el('<p class="hint">인쇄하면 조각마다 A4 한 장씩 크게 나오고, 붙일 자리 지도가 함께 있어요. 겨울 풍경은 Canva로 만든 선 그림이에요.</p>'));
     ctx.print(() => {

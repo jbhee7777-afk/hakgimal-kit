@@ -211,3 +211,14 @@
 .esc-hints { display: flex; flex-direction: column; gap: 8px; max-width: 860px; }
 .esc-hints p { margin: 0; background: #FFF7D6; border-radius: 14px; padding: 10px 18px; font-size: clamp(17px, 1.7vw, 24px); text-align: left; }
 .esc-hints p b { display: inline-block; background: #F5B700; color: #fff; border-radius: 10px; padding: 1px 10px; margin-right: 10px; font-size: .8em; }
+
+/* 미래의 명함 4장 (크게) */
+.ncards { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); gap: 18px; padding: 0 30px; }
+.ncard { border-width: 2.5px; border-radius: 22px; }
+.nc-band { width: 170px; } .nc-face { width: 124px; height: 124px; }
+.nc-main { padding: 16px 26px; gap: 10px; justify-content: center; }
+.nc-job span, .nc-do span, .nc-ic span { font-size: 15px; } .nc-job span { padding: 3px 12px; border-radius: 12px; }
+.nc-name i { height: 50px; border-bottom-width: 3px; }
+.nc-do i, .nc-ic i { height: 28px; }
+.page.example .nc-name i { display: flex; align-items: flex-end; } .page.example .nc-name .exw { font-size: 30px; }
+.page.example .nc-job i .exw { font-size: 20px; }
