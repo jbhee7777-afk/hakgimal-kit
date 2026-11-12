@@ -7,13 +7,13 @@
 
   window.nameLine = function () {
     const m = Store.get();
-    return `<div class="pname">${m.grade ? esc(m.grade) : '<i style="width:34px"></i>'}학년${m.cls ? esc(m.cls) : '<i style="width:34px"></i>'}반 <i style="width:34px"></i>번 이름 <i></i></div>`;
+    return `<div class="pname">${m.grade ? esc(m.grade) : '<i style="width:34px"></i>'}학년 ${m.cls ? esc(m.cls) : '<i style="width:34px"></i>'}반 <i style="width:34px"></i>번 이름 <i></i></div>`;
   };
 
   window.pageFrame = function (a, title, guide, opt) {
     opt = opt || {};
     const c = catOf(a);
-    const p = el(`<div class="page" style="${catVars(c)}"><div class="ph"><div><div class="pnum">${esc(c.name)} 활동 ${a.n}</div><div class="pt">${ed(esc(title || a.name))}</div></div>${opt.noName ? '' : nameLine()}</div>${guide ? `<p class="pg">${ed(esc(guide))}</p>` : ''}</div>`);
+    const p = el(`<div class="page" data-act="${a.n}" style="${catVars(c)}"><div class="ph"><div class="pnum">${esc(c.name)} · 활동 ${a.n}</div><div class="pt">${ed(esc(title || a.name))}</div><img class="psticker" src="img/cat${c.id}.png" alt=""></div>${opt.noName ? '' : `<div class="pmeta">${nameLine()}</div>`}${guide ? `<p class="pg">${ed(esc(guide))}</p>` : ''}</div>`);
     return p;
   };
 
@@ -49,11 +49,11 @@
       <div style="font-size:21px;font-weight:700;display:flex;gap:8px;align-items:flex-end;height:44px;border-bottom:1.5px solid #B8C1CF">${b.to ? ed(esc(b.to)) : '<span style="color:#8A95A8">____________</span>에게'}</div>
       <div class="lines">${L(b.lines)}</div>
       <div style="margin-top:auto;display:flex;justify-content:space-between;font-size:18px;padding-top:12px">${b.open ? '<span>열어 볼 날: ______년 ___월 ___일</span>' : '<span>2026년 ___월 ___일</span>'}<span>__________ 씀</span></div></div>`,
-    cards: b => `<div class="cutgrid" style="grid-template-columns:repeat(${b.cols},1fr);grid-template-rows:repeat(${b.rows},1fr)">${Array.from({ length: b.cols * b.rows }, (_, i) => `<div>${i === 0 ? ICON.scissor : ''}<div class="ct">${ed(esc(b.title))}</div>${b.fields.map(f => `<div class="cf">${f ? `<span>${ed(esc(f))}</span>` : ''}<i></i></div>`).join('')}</div>`).join('')}</div>`,
+    cards: b => `<div class="cutgrid" style="grid-template-columns:repeat(${b.cols},1fr);grid-template-rows:repeat(${b.rows},minmax(0,1fr))">${Array.from({ length: b.cols * b.rows }, (_, i) => `<div>${i === 0 ? ICON.scissor : ''}<div class="ct">${ed(esc(b.title))}</div>${b.fields.map(f => `<div class="cf">${f ? `<span>${ed(esc(f))}</span>` : ''}<i></i></div>`).join('')}</div>`).join('')}</div>`,
     news: () => `<div style="border-top:5px double #1F2B45;border-bottom:2px solid #1F2B45;padding:8px 0;display:flex;justify-content:space-between;align-items:flex-end"><b style="font-size:40px;letter-spacing:-1px">${ed('우리 반 추억 신문')}</b><span style="font-size:15px">2026년 ___월 ___일 &nbsp; 기자 __________</span></div>
       <div class="lines"><div class="blk-label">큰 제목</div>${L(1)}</div>
-      <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:20px"><div class="box" style="height:300px"><span class="bl">사진 또는 그림</span></div><div class="lines"><div class="blk-label">기사 (언제, 어디서, 누가, 무엇을)</div>${L(7)}</div></div>
-      <div class="lines">${L(4)}</div>
+      <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:20px"><div class="box" style="height:250px"><span class="bl">사진 또는 그림</span></div><div class="lines"><div class="blk-label">기사 (언제, 어디서, 누가, 무엇을)</div>${L(6)}</div></div>
+      <div class="lines">${L(3)}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div class="lines"><div class="blk-label">작은 기사</div>${L(3)}</div><div class="lines"><div class="blk-label">친구 인터뷰 한마디</div>${L(3)}</div></div>`,
     photocard: () => `<div class="cutgrid" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr">${[0, 1].map(() => `<div style="align-items:center">${ICON.scissor}<div class="ct">앞면</div><div class="box" style="width:230px;flex:1"></div><b style="font-size:20px">${ed('2026 추억 카드')}</b></div><div><div class="ct">뒷면</div>${['이름', '별명', '올해 가장 좋았던 일', '좋아하는 것', '나에게 한마디'].map(f => `<div class="cf"><span>${f}</span><i></i></div>`).join('')}</div>`).join('')}</div>`,
     bookmarks: b => `<div class="cutgrid" style="grid-template-columns:repeat(5,1fr);grid-template-rows:1fr">${b.items.map((t, i) => `<div style="align-items:center;padding:20px 10px">${i === 0 ? ICON.scissor : ''}<svg viewBox="0 0 30 30" style="width:22px;height:22px"><circle cx="15" cy="15" r="8" fill="none" stroke="#8A95A8" stroke-width="2"/></svg><div style="writing-mode:vertical-rl;font-size:30px;font-weight:700;color:var(--c);letter-spacing:4px;margin:14px 0">${ed(esc(t))}</div><div style="flex:1;width:100%;border:1.5px dashed #CDD5E1;border-radius:10px"></div><span style="font-size:13px;color:#8A95A8;margin-top:8px">이름 ________</span></div>`).join('')}</div>`,
@@ -73,7 +73,7 @@
     },
     notice() {
       const m = Store.get();
-      return `<div style="font-size:16.5px;line-height:1.75;display:flex;flex-direction:column;gap:12px">
+      return `<div style="font-size:16px;line-height:1.62;display:flex;flex-direction:column;gap:10px">
         <p style="margin:0">${ed('학부모님, 안녕하십니까? 한 해 동안 아이들이 즐겁게 배우고 자랄 수 있도록 함께해 주셔서 감사합니다. 아이들이 겨울방학을 건강하고 안전하게 보낼 수 있도록 아래 내용을 함께 살펴봐 주세요.')}</p>
         <table class="pt"><tr><th style="width:26%">일정</th><th>날짜</th></tr>
           <tr><td class="lab">방학식</td><td>${ed('2026년 12월 ___일 ( ___ )')}</td></tr>
@@ -126,8 +126,8 @@
       const m = Store.get();
       const F = [['제품 이름', (m.teacher || '○○○') + ' 선생님'], ['출시 연도', '____년생 (비밀일 수도 있어요)'], ['좋아하는 것', '______, ______, 아이들의 웃음'], ['싫어하는 것', '______, 복도에서 뛰기'],
         ['기분 좋아지는 버튼', '"선생님, 안녕하세요!" 하고 먼저 인사하기'], ['자주 하는 말', '"______"'], ['수업 방식', '______'], ['주의 사항', '______할 때는 조심해 주세요.'], ['고장 났을 때', '______ 해 주면 금방 고쳐져요.'], ['보증 기간', '2026년 3월 ~ 평생 (졸업해도 응원해요)']];
-      return `<div style="display:grid;grid-template-columns:240px 1fr;gap:22px"><div class="box" style="height:280px"><span class="bl">선생님 얼굴</span></div><div style="display:flex;flex-direction:column;justify-content:center;gap:6px;font-size:17px;color:#56627A">${ed('이 설명서는 우리 반 선생님을 더 잘 알기 위한 안내서입니다. 글자를 눌러 고쳐 쓰세요.')}</div></div>
-        <table class="pt">${F.map(([k, v]) => `<tr style="height:58px"><td class="lab" style="width:28%">${ed(k)}</td><td style="font-size:17px">${ed(esc(v))}</td></tr>`).join('')}</table>`;
+      return `<div style="display:grid;grid-template-columns:240px 1fr;gap:22px"><div class="box" style="height:240px"><span class="bl">선생님 얼굴</span></div><div style="display:flex;flex-direction:column;justify-content:center;gap:6px;font-size:17px;color:#56627A">${ed('이 설명서는 우리 반 선생님을 더 잘 알기 위한 안내서입니다. 글자를 눌러 고쳐 쓰세요.')}</div></div>
+        <table class="pt">${F.map(([k, v]) => `<tr style="height:54px"><td class="lab" style="width:28%">${ed(k)}</td><td style="font-size:17px">${ed(esc(v))}</td></tr>`).join('')}</table>`;
     },
     checktable: b => `<table class="pt"><tr><th style="width:40%">내 물건</th><th>다 챙겼어요</th><th>집에 가져가요</th><th>버려요</th></tr>${b.items.map(t => `<tr data-grow style="height:54px"><td style="font-weight:700">${ed(esc(t))}</td><td>${circ}</td><td>${circ}</td><td>${circ}</td></tr>`).join('')}<tr style="height:54px"><td></td><td></td><td></td><td></td></tr></table>`,
     stars: b => `<div class="box" style="height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px"><span class="bl">${esc(b.label)}</span><div style="display:flex;gap:6px">${Array(5).fill('<svg viewBox="0 0 24 24" style="width:54px;height:54px"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z" fill="none" stroke="#E3A400" stroke-width="1.5" stroke-linejoin="round"/></svg>').join('')}</div><span style="font-size:14px;color:#8A95A8">마음에 든 만큼 색칠해요</span></div>`,

@@ -1,0 +1,71 @@
+/* ── 활동지 꾸밈 (귀엽게, 파스텔 + 스티커 그림) ── */
+.page { --soft: color-mix(in srgb, var(--c) 30%, white); --line: color-mix(in srgb, var(--c) 22%, #D5DCE6); padding: 40px 48px 62px; gap: 14px; }
+.page::before { content: ''; position: absolute; inset: 14px; border: 2.5px solid var(--soft); border-radius: 28px; pointer-events: none; }
+.page::after { content: ''; position: absolute; left: 30px; bottom: 22px; width: 150px; height: 18px; pointer-events: none; opacity: .55;
+  background: radial-gradient(circle, var(--c) 2.2px, transparent 2.6px) 0 50% / 18px 18px repeat-x; }
+
+.ph { position: relative; display: block; background: var(--t); border: 0; border-radius: 22px; padding: 12px 140px 12px 22px; margin-top: 4px; min-height: 76px; }
+.ph .pnum { font-size: 14px; color: var(--c); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; background: #fff; padding: 2px 12px; border-radius: 20px; margin-bottom: 6px; }
+.ph .pt { font-size: 29px; line-height: 1.15; }
+.ph .psticker { position: absolute; right: 10px; bottom: -6px; height: 100px; filter: drop-shadow(0 3px 0 rgba(255,255,255,.9)); }
+.ph .pname { position: absolute; right: 0; bottom: -34px; }
+.pmeta { display: flex; justify-content: flex-end; min-height: 22px; font-size: 16px; color: #36435E; }
+.pmeta i { display: inline-block; width: 110px; border-bottom: 1.8px solid var(--line); font-style: normal; }
+.pg { margin: -4px 0 0; font-size: 15.5px; color: #56627A; display: flex; gap: 8px; align-items: flex-start; }
+.pg::before { content: ''; flex: none; width: 18px; height: 18px; margin-top: 2px; background: var(--c); opacity: .8;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.6 6.4L21 9.3l-4.9 4.3 1.5 6.6L12 16.8 6.4 20.2l1.5-6.6L3 9.3l6.4-.9z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.6 6.4L21 9.3l-4.9 4.3 1.5 6.6L12 16.8 6.4 20.2l1.5-6.6L3 9.3l6.4-.9z'/%3E%3C/svg%3E") center/contain no-repeat; }
+
+.page .blk-label { display: inline-flex; align-self: flex-start; background: var(--t); color: #1F2B45; padding: 4px 14px 4px 10px; border-radius: 14px; font-size: 16.5px; }
+.page .blk-label::before { width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 4px var(--c); }
+.page .lines { display: flex; flex-direction: column; }
+.page .lines .ln { border-bottom: 1.8px solid var(--line); }
+.page .box { border: 2.5px solid var(--soft); border-radius: 22px; background: color-mix(in srgb, var(--t) 22%, white); }
+.page .box .bl { background: var(--t); color: #1F2B45; border-radius: 12px; padding: 2px 12px; top: -13px; font-size: 15px; }
+.page table.pt th { background: var(--t); border-color: var(--soft); }
+.page table.pt td { border-color: var(--soft); }
+.page table.pt td.lab { background: color-mix(in srgb, var(--t) 40%, white); }
+.page table.pt { border-radius: 16px; overflow: hidden; border-collapse: separate; border-spacing: 0; border: 2px solid var(--soft); }
+.page table.pt th, .page table.pt td { border-width: 0 1.5px 1.5px 0; border-style: solid; }
+.page table.pt tr > *:last-child { border-right: 0; }
+.page table.pt tr:last-child > td { border-bottom: 0; }
+.page .cutgrid { border-color: var(--soft); }
+.page .cutgrid > div { border-color: var(--soft); }
+.page .cutgrid .ct { display: inline-flex; align-self: flex-start; background: var(--t); padding: 2px 12px; border-radius: 12px; color: #1F2B45; }
+.page .cutgrid .cf i { border-bottom-color: var(--line); min-height: 22px; }
+.page .cutgrid > div { padding: 12px 14px; gap: 5px; }
+.page .qimg { width: 92px; height: 92px; object-fit: cover; border-radius: 18px; border: 3px solid #fff; box-shadow: 0 0 0 2px var(--soft); flex: none; }
+.page .qr { position: absolute; right: 24px; bottom: 18px; width: 40px; height: 40px; background: #fff; z-index: 2; }
+.page .qr svg { width: 100%; height: 100%; }
+.page .qrname { position: absolute; right: 70px; bottom: 26px; font-size: 11px; color: #8A95A8; z-index: 2; }
+@media print { .page::before, .page .box, .page .blk-label, .ph { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+.page .cutgrid { min-height: 0; }
+
+/* ── 작품 모음 ── */
+.drop { border: 3px dashed color-mix(in srgb, var(--c) 45%, white); background: #fff; border-radius: 22px; padding: 22px 26px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; margin-bottom: 14px; }
+.drop b { font-size: 24px; color: var(--c); }
+.drop span { color: var(--sub); }
+.drop.on, .drop:hover { background: var(--t); }
+.drop.busy { opacity: .6; pointer-events: none; }
+.prog { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; font-weight: 700; }
+.pbar { flex: 1; height: 14px; border-radius: 7px; background: #fff; overflow: hidden; }
+.pbar b { display: block; height: 100%; width: 0; background: var(--c); transition: width .3s; }
+.ggroup { margin: 8px 0 18px; }
+.ghead { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.ghead h3 { margin: 0; font-size: 20px; }
+.ghead span { color: var(--sub); }
+.gthumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+.gth { border: 0; background: #fff; border-radius: 14px; padding: 6px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 1px 0 rgba(31,43,69,.08); }
+.gth img { width: 100%; aspect-ratio: 210/297; object-fit: cover; border-radius: 9px; background: #eee; }
+.gth span { font-size: 13px; font-weight: 700; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gview { position: fixed; inset: 0; z-index: 120; background: #141A2A; display: grid; grid-template-columns: 1fr 300px; }
+.gimg { display: flex; align-items: center; justify-content: center; padding: 16px; min-height: 0; overflow: hidden; }
+.gimg img { max-width: 100%; max-height: 100%; background: #fff; border-radius: 6px; transition: transform .3s; }
+.gside { background: var(--paper); padding: 22px; display: flex; flex-direction: column; gap: 12px; overflow: auto; }
+.gtitle { font-size: 22px; line-height: 1.3; }
+.gsub { color: var(--sub); }
+.gnav { display: flex; gap: 8px; }
+.gnav .btn { flex: 1; justify-content: center; }
+.gkids { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.gkids button { border: 1.5px solid var(--rule); background: #fff; border-radius: 10px; padding: 8px; font-weight: 700; text-align: left; }
+.gkids button:hover { border-color: var(--ink); }

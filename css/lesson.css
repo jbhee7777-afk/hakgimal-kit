@@ -104,3 +104,23 @@
 .modeseg button { text-align: left; border: 2px solid var(--rule); background: #fff; border-radius: 12px; padding: 10px 14px; font-weight: 700; font-size: 16px; }
 .modeseg button.on { border-color: var(--c); background: var(--t); }
 .modeseg button small { display: block; font-weight: 400; font-size: 13px; color: var(--sub); }
+.lsn-exbox { background: #fff; border-radius: 30px; padding: 34px 40px 36px; position: relative; border: 4px dashed var(--li); }
+.lsn-exbox span { position: absolute; top: -24px; left: 30px; background: var(--li); color: #fff; font-size: 28px; font-weight: 700; padding: 4px 22px; border-radius: 20px; }
+.lsn-exbox p { margin: 0; font-size: 44px; line-height: 1.45; font-weight: 700; word-break: keep-all; }
+.lsn-pick { display: flex; align-items: center; gap: 30px; margin-top: 40px; cursor: default; }
+.lsn-picked { font-size: 80px; color: var(--li); }
+.lsn-parts i:empty { display: none; }
+.esc-q { max-width: 1000px; line-height: 1.5; }
+.esc-q .eq { display: inline-block; font-size: 1.15em; color: var(--c); margin: 4px 0; }
+.msq { border-collapse: collapse; margin: 12px auto 0; font-size: .95em; }
+.msq td, .msq th { width: 64px; height: 64px; border: 3px solid #1F2B45; text-align: center; background: #fff; }
+.msq th { background: var(--t); color: var(--c); border-color: var(--t); }
+.msq.cip td { width: 58px; height: 58px; }
+
+.lsn-zod { display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; }
+.lsn-zod div { background: #fff; border-radius: 26px; padding: 20px 10px; text-align: center; position: relative; }
+.lsn-zod i { display: block; font-style: normal; font-size: 26px; color: #8A95A8; font-weight: 700; }
+.lsn-zod b { font-size: 46px; }
+.lsn-zod div.on { background: var(--li); color: #fff; }
+.lsn-zod div.on i { color: rgba(255,255,255,.8); }
+.lsn-zod span { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); background: #FFC23D; color: #1F2B45; font-weight: 700; font-size: 24px; padding: 2px 14px; border-radius: 14px; }

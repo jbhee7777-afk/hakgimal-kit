@@ -80,6 +80,7 @@
   T.quiz = function (a, ctx) {
     const mode = a.mode, st = ctx.stage, c = catOf(a);
     let i = 0, list = [], score = null;
+    let goldGrade = Store.d('gold:grade', Math.min(6, parseInt(Store.get().grade, 10) || 0));
     const body = el('<div class="stagebody"></div>'); st.appendChild(body);
     const prog = el('<div class="progress"><b></b></div>'); st.appendChild(prog);
     const teamKey = mode === 'balance' || mode === 'review' ? null : a.n;
@@ -91,7 +92,7 @@
       const f = filter || 0;
       if (mode === 'chosung') list = byLevel(BANK.chosung).filter(x => !f || x[2] === f).map(x => ({ q: chosung(x[0]), a: x[0], h: x[1], l: x[2] }));
       if (mode === 'creative') list = byLevel(BANK.creative).filter(x => !f || x[2] === f).map(x => ({ q: x[0], a: x[1], l: x[2] }));
-      if (mode === 'golden') list = byLevel(getCustom('golden', BANK.golden.map(x => `${x[0]} | ${x[1]} | ${x[2]}`).join('\n')).map(r => [r[0], r[1], +r[2] || 2])).filter(x => !f || x[2] === f).map(x => ({ q: x[0], a: x[1], l: x[2] }));
+      if (mode === 'golden') list = byLevel(getCustom(goldKey(), goldDef()).map(r => [r[0], r[1], +r[2] || 2])).filter(x => !f || x[2] === f).map(x => ({ q: x[0], a: x[1], l: x[2] }));
       if (mode === 'ox') list = shuffle(BANK.ox).map(x => ({ q: x[0], a: x[1], e: x[2] }));
       if (mode === 'balance') list = shuffle(BANK.balance).map(x => ({ A: x[0], B: x[1], na: 0, nb: 0 }));
       if (mode === 'fake') list = shuffle(BANK.fake).map(x => ({ q: x[0], a: x[1], e: x[2] }));
@@ -99,13 +100,18 @@
       if (mode === 'review' || mode === 'battle') list = [];
       i = 0;
     }
+    function goldKey() { return goldGrade ? 'golden' + goldGrade : 'golden'; }
+    function goldDef() { const src = goldGrade ? BANK.goldenG[goldGrade] : BANK.golden; return src.map(x => `${x[0]} | ${x[1]} | ${x[2]}`).join('\n'); }
     function getCustom(key, def) { const txt = Store.d('custom:' + a.n + key, def); return txt.split('\n').map(l => l.split('|').map(s => s.trim())).filter(r => r[0]); }
 
     /* 학습 퀴즈 상태 */
     const g0 = Math.min(6, Math.max(1, parseInt(Store.get().grade, 10) || 2));
     let rv = { level: 1, streak: 0, right: 0, total: 0, grade: Store.d('rv:grade:' + a.n, g0), subj: Store.d('rv:subj:' + a.n, 'mix'), cur: null, answered: false };
+    rv.limit = Store.d('rv:limit:' + a.n, 10); rv.qn = 0; rv.seen = new Set();
     function nextMC() {
-      rv.cur = makeReview(rv.grade, rv.subj, rv.level);
+      let q, k = 0; do { q = makeReview(rv.grade, rv.subj, rv.level); k++; } while (rv.seen.has(q.q + '|' + q.a) && k < 40);
+      rv.seen.add(q.q + '|' + q.a); rv.qn++;
+      rv.cur = q;
       rv.answered = false;
     }
 
@@ -140,10 +146,19 @@
         draw();
       }
     }
+    function restartMC() { rv.qn = 0; rv.right = 0; rv.total = 0; rv.streak = 0; rv.seen = new Set(); nextMC(); show(); }
+    function endMC() {
+      clearTimers(); prog.firstChild.style.width = '100%';
+      const sc = mode === 'battle' ? score.scores().slice(0, score.teams()) : null;
+      const best = sc ? Math.max(...sc) : 0;
+      body.innerHTML = `<div class="center"><div class="qbig">${rv.limit}문제 끝!</div>${mode === 'battle' ? `<p class="expl">${sc.map((v, k) => `${k + 1}모둠 ${v}점`).join(' · ')}</p><div class="qhuge" style="font-size:clamp(40px,6vw,80px)">${sc.map((v, k) => v === best ? (k + 1) + '모둠' : '').filter(Boolean).join(', ')} 우승!</div>` : `<div class="qhuge" style="font-size:clamp(60px,9vw,130px)">${rv.right} / ${rv.limit}</div><p class="expl">${rv.right >= rv.limit * .8 ? '정말 대단해요! 1년 동안 열심히 공부했어요.' : rv.right >= rv.limit * .5 ? '잘했어요! 틀린 문제는 방학에 한 번 더 봐요.' : '괜찮아요. 다시 하면 더 잘할 수 있어요!'}</p>`}<button class="btn huge dark" data-again>새 문제로 다시 하기</button></div>`;
+      confetti(st); beep('fan');
+      $('[data-again]', body).onclick = restartMC;
+    }
     function showMC() {
       if (!rv.cur) nextMC();
       const q = rv.cur, w = el(`<div class="center"></div>`);
-      const turnTxt = mode === 'battle' ? `<div class="qcount" style="font-size:22px;color:var(--ink)">${score.turn() + 1}모둠 차례예요</div>` : `<div class="qcount">맞힌 문제 ${rv.right} / ${rv.total}</div>`;
+      const turnTxt = mode === 'battle' ? `<div class="qcount" style="font-size:22px;color:var(--ink)">${score.turn() + 1}모둠 차례예요</div>` : `<div class="qcount">${rv.qn} / ${rv.limit}번째 문제 · 맞힌 문제 ${rv.right}</div>`;
       w.innerHTML = `${turnTxt}<span class="lvl">${[1, 2, 3].map(k => `<i class="${k <= rv.level ? 'on' : ''}"></i>`).join('')} ${rv.grade}학년 ${esc(q.s)} ${rv.level}단계</span>${q.svg || ''}<div class="qbig" style="font-size:clamp(28px,3.8vw,54px)">${fracHTML(q.q)}</div><div class="choices">${q.o.map((o, k) => `<button class="choice" data-o="${esc(o)}"><span class="k">${k + 1}</span>${fracHTML(o)}</button>`).join('')}</div><div class="ctrl"><button class="btn big" data-n>다음 문제 ${ICON.next}</button></div>`;
       body.appendChild(w);
       $$('.choice', w).forEach(b => b.onclick = () => {
@@ -156,7 +171,8 @@
           else { rv.answered = true; rv.total++; rv.streak = 0; $$('.choice', w).forEach(x => { if (x.dataset.o === q.a) x.classList.add('right'); x.disabled = true; }); }
         }
       });
-      $('[data-n]', w).onclick = () => { if (mode === 'battle' && rv.answered) score.nextTurn(); nextMC(); show(); };
+      $('[data-n]', w).textContent = rv.qn >= rv.limit ? '결과 보기' : '다음 문제';
+      $('[data-n]', w).onclick = () => { if (mode === 'battle' && rv.answered) score.nextTurn(); if (rv.qn >= rv.limit) return endMC(); nextMC(); show(); };
     }
     function finish() {
       prog.firstChild.style.width = '100%';
@@ -170,18 +186,20 @@
     if (['chosung', 'creative', 'golden'].includes(mode)) ctx.opts.append(field('단계', seg([[0, '쉬움→어려움'], [1, '쉬움'], [2, '보통'], [3, '어려움']], 0, v => { curF = v; build(v); show(); })));
     if (mode === 'review' || mode === 'battle') {
       const subjBox = el('<div></div>');
-      const drawSubj = () => { subjBox.innerHTML = ''; if (!REVIEW_SUBJ(rv.grade).some(x => x[0] === rv.subj)) rv.subj = 'mix'; subjBox.appendChild(field('과목', seg(REVIEW_SUBJ(rv.grade), rv.subj, v => { rv.subj = v; Store.set('rv:subj:' + a.n, v); nextMC(); show(); }))); };
-      ctx.opts.append(field('학년', seg([1, 2, 3, 4, 5, 6].map(g => [g, g + '학년']), rv.grade, v => { rv.grade = v; Store.set('rv:grade:' + a.n, v); rv.level = 1; drawSubj(); nextMC(); show(); })), subjBox);
+      const drawSubj = () => { subjBox.innerHTML = ''; if (!REVIEW_SUBJ(rv.grade).some(x => x[0] === rv.subj)) rv.subj = 'mix'; subjBox.appendChild(field('과목', seg(REVIEW_SUBJ(rv.grade), rv.subj, v => { rv.subj = v; Store.set('rv:subj:' + a.n, v); restartMC(); }))); };
+      ctx.opts.append(field('학년', seg([1, 2, 3, 4, 5, 6].map(g => [g, g + '학년']), rv.grade, v => { rv.grade = v; Store.set('rv:grade:' + a.n, v); rv.level = 1; drawSubj(); restartMC(); })), subjBox);
       drawSubj();
-      ctx.opts.append(field('시작 단계', seg([[1, '1'], [2, '2'], [3, '3']], 1, v => { rv.level = v; nextMC(); show(); })));
+      ctx.opts.append(field('시작 단계', seg([[1, '1'], [2, '2'], [3, '3']], 1, v => { rv.level = v; restartMC(); })));
+      ctx.opts.append(field('문제 수', seg([[10, '10문제'], [15, '15문제'], [20, '20문제']], rv.limit, v => { rv.limit = v; Store.set('rv:limit:' + a.n, v); restartMC(); })));
       ctx.opts.append(el('<p class="hint">2022 개정 교육과정 기준이에요. 수학은 학년별로 매번 새 문제가 나오고, 국어·사회·과학·통합은 학년군(1~2, 3~4, 5~6) 문제예요. 두 번 연속 맞히면 단계가 올라가요.</p>'));
     }
     if (mode === 'custom' || mode === 'golden') {
-      const key = mode === 'golden' ? 'golden' : 'custom';
-      const def = mode === 'golden' ? BANK.golden.map(x => `${x[0]} | ${x[1]} | ${x[2]}`).join('\n') : CUSTOM_DEF;
-      const t = ta(Store.d('custom:' + a.n + key, def || ''), 9);
+      const key = () => mode === 'golden' ? goldKey() : 'custom';
+      const def = () => mode === 'golden' ? goldDef() : CUSTOM_DEF;
+      const t = ta(Store.d('custom:' + a.n + key(), def() || ''), 9);
       const sv = el('<button class="btn dark">문제 저장하고 시작</button>');
-      sv.onclick = () => { Store.set('custom:' + a.n + key, t.value); build(curF); show(); toast('문제를 저장했어요'); };
+      sv.onclick = () => { Store.set('custom:' + a.n + key(), t.value); build(curF); show(); toast('문제를 저장했어요'); };
+      if (mode === 'golden') ctx.opts.prepend(field('학년', seg([[0, '공통'], [1, '1학년'], [2, '2학년'], [3, '3학년'], [4, '4학년'], [5, '5학년'], [6, '6학년']], goldGrade, v => { goldGrade = v; Store.set('gold:grade', v); t.value = Store.d('custom:' + a.n + key(), def()); build(curF); show(); })));
       ctx.opts.append(field(`문제 고치기 (한 줄에 "질문 | 정답${mode === 'golden' ? ' | 단계 1~3' : ''}")`, t), sv);
     }
     build(); show();
@@ -277,14 +295,15 @@
   /* ─── 빙고 ─── */
   T.bingo = function (a, ctx) {
     const st = ctx.stage;
-    const gr = parseInt(Store.get().grade, 10) || 2;
-    const poolName = a.pool === 'concept' ? (gr <= 2 ? 'concept' : gr <= 4 ? 'concept2' : 'concept3') : a.pool;
-    const key = 'pool:' + a.n + (a.pool === 'concept' ? ':' + poolName : '');
-    const getPool = () => Store.d(key, BINGO[poolName].join('\n')).split('\n').map(s => s.trim()).filter(Boolean);
+    let bgr = Store.d('bingo:grade', Math.min(6, Math.max(1, parseInt(Store.get().grade, 10) || 2)));
+    const poolSrc = () => a.pool === 'concept' ? BINGO.byGrade[bgr] : BINGO[a.pool];
+    const key = () => 'pool:' + a.n + (a.pool === 'concept' ? ':g' + bgr : '');
+    const getPool = () => Store.d(key(), poolSrc().join('\n')).split('\n').map(s => s.trim()).filter(Boolean);
     const body = el('<div class="stagebody"></div>'); st.appendChild(body);
     let size = a.mission ? 4 : 4;
     const t = ta(getPool().join('\n'), 8);
-    const sv = el('<button class="btn">낱말 저장</button>'); sv.onclick = () => { Store.set(key, t.value); toast('저장했어요'); a.mission ? mission() : caller(); };
+    const sv = el('<button class="btn">낱말 저장</button>'); sv.onclick = () => { Store.set(key(), t.value); toast('저장했어요'); a.mission ? mission() : caller(); };
+    if (a.pool === 'concept') ctx.opts.append(field('학년', seg([1, 2, 3, 4, 5, 6].map(g => [g, g + '학년']), bgr, v => { bgr = v; Store.set('bingo:grade', v); t.value = getPool().join('\n'); caller(); })));
     ctx.opts.append(field('판 크기', seg([[3, '3×3'], [4, '4×4'], [5, '5×5']], size, v => { size = v; a.mission ? mission() : 0; })));
     ctx.opts.append(field(a.mission ? '미션 목록 (한 줄에 하나)' : '빙고 낱말 (한 줄에 하나)', t), sv);
     if (!a.mission) {
@@ -344,10 +363,12 @@
     st.appendChild(inp);
     inp.hidden = !Store.d('wallType:' + a.n, false);
     const [txt, who] = $$('input', inp), sel = $('select', inp);
-    if (a.sheet) { const pb = el('<button class="btn dark">손으로 쓰는 종이 쪽지 인쇄</button>'); pb.onclick = () => printPages([buildSheet(a, a.sheet)]); ctx.opts.append(pb, el('<p class="hint">아이들은 종이 쪽지에 손으로 써요. 다 쓴 쪽지는 게시판에 붙이거나, 선생님이 아래 단추로 화면에 옮겨 적어 함께 볼 수 있어요.</p>')); }
-    const tg = el(`<button class="btn">${inp.hidden ? '선생님이 화면에 옮겨 적기' : '옮겨 적기 칸 숨기기'}</button>`);
-    tg.onclick = () => { inp.hidden = !inp.hidden; Store.set('wallType:' + a.n, !inp.hidden); tg.textContent = inp.hidden ? '선생님이 화면에 옮겨 적기' : '옮겨 적기 칸 숨기기'; if (!inp.hidden) txt.focus(); };
-    ctx.opts.append(tg);
+    if (a.sheet) { const pb = el('<button class="btn dark">손으로 쓰는 종이 쪽지 인쇄</button>'); pb.onclick = () => printPages([buildSheet(a, a.sheet)]); ctx.opts.append(pb, el('<p class="hint">아이들은 종이 쪽지에 손으로 써서 교실 게시판에 붙여요. 완성한 게시판은 사진 한 장을 찍어 "작품 모음"에 올리면 끝이에요.</p>')); }
+    { const gl = el('<a class="btn" href="#/gallery">완성한 게시판 사진 올리기</a>'); ctx.opts.append(gl); }
+    const tg = el(`<button class="btn">${inp.hidden ? '(선택) 화면에 직접 적기' : '적기 칸 숨기기'}</button>`);
+    tg.onclick = () => { inp.hidden = !inp.hidden; Store.set('wallType:' + a.n, !inp.hidden); tg.textContent = inp.hidden ? '(선택) 화면에 직접 적기' : '적기 칸 숨기기'; if (!inp.hidden) txt.focus(); };
+    tg.className = 'btn flat'; tg.style.cssText = 'font-size:13px;color:var(--sub);margin-top:auto';
+    setTimeout(() => ctx.opts.appendChild(tg), 0);
     const add = () => { if (!txt.value.trim()) return; items.push({ t: txt.value.trim(), w: who ? who.value.trim() : '', m: sel ? sel.value : '', r: 0, id: Date.now() }); Store.save(); txt.value = ''; if (who) who.value = ''; beep('pop'); draw(true); txt.focus(); };
     $('button', inp).onclick = add; txt.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) add(); };
     const del = i => { if (confirm(`"${items[i].t}" 을(를) 지울까요?`)) { items.splice(i, 1); Store.save(); draw(); } };
@@ -363,7 +384,7 @@
           const tg = el(`<div class="tag ${isNew && i === items.length - 1 ? 'new' : ''}" style="left:calc(${p[0] + jit}% - 75px);top:calc(${p[1] + jit}% + 24px);background:${cols[i % cols.length]};animation-delay:${-(i * .7)}s">${esc(it.t)}${it.w ? `<span class="who">${esc(it.w)}</span>` : ''}</div>`);
           tg.onclick = () => del(i); area.appendChild(tg);
         });
-        if (!items.length) area.insertAdjacentHTML('beforeend', `<div class="center" style="position:absolute;inset:0;pointer-events:none"><div class="qbig" style="font-size:30px;background:rgba(255,255,255,.8);padding:10px 24px;border-radius:14px">아이들이 손으로 쓴 쪽지를 선생님이 옮겨 적으면 여기에 걸려요</div></div>`);
+        if (!items.length) area.insertAdjacentHTML('beforeend', `<div class="center" style="position:absolute;inset:0;pointer-events:none"><div class="qbig" style="font-size:30px;background:rgba(255,255,255,.8);padding:10px 24px;border-radius:14px">종이 쪽지를 교실 나무에 붙여 함께 키워요</div></div>`);
       }
       if (mode === 'timeline') {
         const g = el('<div class="timeline"></div>');
@@ -701,7 +722,7 @@
   function monthCells(m) { const first = new Date(2027, m - 1, 1).getDay(), days = new Date(2027, m, 0).getDate(); const c = []; for (let k = 0; k < first; k++) c.push(0); for (let d = 1; d <= days; d++) c.push(d); while (c.length % 7) c.push(0); return c; }
   function calPage(a, m) {
     const c = monthCells(m);
-    const p = el(`<div class="page" style="${catVars(catOf(a))}"></div>`);
+    const p = el(`<div class="page" data-act="${a.n}" style="${catVars(catOf(a))}"></div>`);
     p.innerHTML = `<div class="box" style="height:330px"><span class="bl">${m}월의 그림</span></div>
       <div style="display:flex;align-items:flex-end;gap:16px"><b style="font-size:76px;line-height:.9;color:var(--c)">${m}</b><div style="font-size:24px;font-weight:700;padding-bottom:6px">월 &nbsp;<span style="font-size:18px;color:#56627A;font-weight:400">2027</span></div><div style="margin-left:auto;display:flex;align-items:flex-end;gap:10px"><div style="text-align:right;padding-bottom:6px"><div style="font-size:19px;font-weight:700;color:#D2302C">2027 정미년, 붉은 양의 해</div>${m <= 2 ? '<div style="font-size:12px;color:#8A95A8">음력 설날(2월 7일)부터 정미년이 시작돼요</div>' : ''}<div style="font-size:15px;color:#56627A;margin-top:4px">이름 __________</div></div><img src="img/sheep.png" alt="" style="height:96px"></div></div>
       <table style="width:100%;border-collapse:collapse;table-layout:fixed;flex:1"><tr>${DOW.map((d, k) => `<th style="padding:6px;font-size:16px;border-bottom:2.5px solid #1F2B45;color:${k === 0 ? '#C9305A' : k === 6 ? '#2366C2' : '#1F2B45'}">${d}</th>`).join('')}</tr>
@@ -721,12 +742,36 @@
       mn.onclick = () => { sel = m; $$('.mini', left).forEach(x => x.classList.remove('on')); mn.classList.add('on'); showPaper(right, [calPage(a, m)]); };
       left.appendChild(mn);
     }
-    showPaper(right, [calPage(a, 1)]);
-    ctx.print(() => printPages([calPage(a, sel)]));
-    const all = el('<button class="btn dark">12달 모두 인쇄</button>'); all.onclick = () => printPages(Array.from({ length: 12 }, (_, k) => calPage(a, k + 1)));
-    ctx.opts.append(all, el('<p class="hint">왼쪽 달을 누르면 그 달 활동지가 보여요. 빨간 날은 일요일과 공휴일이에요.</p>'));
+    let per = Store.d('cal:per', 4);
+    const preview = () => showPaper(right, per === 1 ? [calPage(a, sel)] : calSheets(a, per).slice(0, 1));
+    preview();
+    ctx.print(() => printPages(per === 1 ? Array.from({ length: 12 }, (_, k) => calPage(a, k + 1)) : calSheets(a, per)));
+    const info = el('<p class="hint"></p>');
+    const upd = () => { const n = per === 1 ? 12 : 12 / per; const kids = Store.roster().length || 24; info.innerHTML = `한 사람에 <b>${n}장</b>이에요. ${kids}명이면 <b>${n * kids}장</b>이 필요해요.`; };
+    const segc = el('<div class="seg"></div>');
+    [[4, '한 장에 4달 (3장)'], [2, '한 장에 2달 (6장)'], [12, '한 장에 12달 (1장)'], [1, '한 장에 1달 (12장)']].forEach(([v, t]) => { const b = el(`<button class="${v === per ? 'on' : ''}">${t}</button>`); b.onclick = () => { per = v; Store.set('cal:per', v); $$('button', segc).forEach(x => x.classList.remove('on')); b.classList.add('on'); upd(); preview(); }; segc.appendChild(b); });
+    const lab = el('<label class="f">인쇄 방법</label>'); lab.appendChild(segc);
+    const cls = el('<button class="btn">우리 반 달력 하나 만들기 (12장)</button>'); cls.onclick = () => printPages(Array.from({ length: 12 }, (_, k) => calPage(a, k + 1)));
+    ctx.opts.append(lab, info, cls, el('<p class="hint">"우리 반 달력"은 한 달씩 나눠 맡아 그림을 그리고 모아서 교실 달력 하나로 만들어요. 종이가 가장 적게 들어요. 빨간 날은 일요일과 공휴일이에요.</p>'));
+    upd();
   };
-  T.calendar.pages = a => Array.from({ length: 12 }, (_, k) => calPage(a, k + 1));
+  /* 여러 달을 한 장에 */
+  function calSheets(a, per) {
+    const pages = [], cols = per === 12 ? 3 : per === 4 ? 2 : 1;
+    const dh = per === 12 ? 0 : per === 4 ? 120 : 170, rh = per === 12 ? 17 : per === 4 ? 30 : 36, fs = per === 12 ? 11 : per === 4 ? 13 : 16;
+    for (let s = 1; s <= 12; s += per) {
+      const p = pageFrame(a, per === 12 ? '2027 나의 달력' : `2027 달력 (${s}~${s + per - 1}월)`, per === 12 ? '좋아하는 달에 동그라미하고, 빈 곳에 새해 그림을 그려요.' : '달마다 위 칸에 그 달의 그림을 그리고, 중요한 날에 표시해요.');
+      const months = Array.from({ length: per }, (_, k) => s + k);
+      p.insertAdjacentHTML('beforeend', `${per === 12 ? `<div style="display:flex;align-items:center;gap:12px;background:#FFE9E4;border-radius:14px;padding:6px 14px"><img src="img/sheep.png" alt="" style="height:54px"><b style="color:#D2302C;font-size:18px">2027 정미년, 붉은 양의 해</b><span style="font-size:12px;color:#8A95A8">음력 설날(2월 7일)부터</span></div>` : ''}<div style="flex:1;display:grid;grid-template-columns:repeat(${cols},1fr);gap:${per === 12 ? 10 : 16}px;align-content:start">${months.map(m => {
+        const c = monthCells(m);
+        return `<div style="border:2px solid var(--soft);border-radius:16px;padding:${per === 12 ? 6 : 10}px;display:flex;flex-direction:column;gap:4px;background:#fff">${dh ? `<div style="height:${dh}px;border:1.5px dashed #CDD5E1;border-radius:12px"></div>` : ''}<div style="display:flex;align-items:baseline;gap:6px"><b style="font-size:${per === 12 ? 20 : 28}px;color:var(--c);line-height:1">${m}</b><span style="font-size:${fs}px">월</span>${per === 4 || per === 2 ? `<span style="margin-left:auto;font-size:12px;color:#8A95A8">목표 ______________</span>` : ''}</div>
+          <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:${fs}px"><tr>${DOW.map((d, k) => `<th style="color:${k === 0 ? '#C9305A' : k === 6 ? '#2366C2' : '#56627A'};font-weight:700;padding:1px">${d}</th>`).join('')}</tr>${Array.from({ length: c.length / 7 }, (_, r) => `<tr>${c.slice(r * 7, r * 7 + 7).map((d, k) => { const hn = d && HOLI2027[m + '-' + d]; return `<td style="height:${rh}px;vertical-align:top;text-align:${per === 12 ? 'center' : 'left'};padding:1px 3px;border-top:1px solid #E4E9F1;color:${hn || k === 0 ? '#C9305A' : k === 6 ? '#2366C2' : '#1F2B45'};font-weight:${hn ? 700 : 400}">${d || ''}${hn && per !== 12 ? `<div style="font-size:9px;line-height:1.1">${hn}</div>` : ''}</td>`; }).join('')}</tr>`).join('')}</table></div>`;
+      }).join('')}</div><div style="font-size:10px;color:#8A95A8">공휴일: 한국천문연구원 2027년 달력자료(공식 발표 전) 기준</div>`);
+      pages.push(p);
+    }
+    return pages;
+  }
+  T.calendar.pages = a => calSheets(a, Store.d('cal:per', 4) === 1 ? 4 : Store.d('cal:per', 4));
 
   /* ─── 협동 컬러링 ─── */
   function mandala(seed) {
@@ -768,7 +813,7 @@
       for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
         const k = r * cols + c + 1;
         const map = `<svg viewBox="0 0 ${cols * 20} ${rows * 20}" style="width:${cols * 16}px;height:${rows * 16}px">${Array.from({ length: cols * rows }, (_, j) => `<rect x="${(j % cols) * 20}" y="${Math.floor(j / cols) * 20}" width="20" height="20" fill="${j + 1 === k ? '#E2456B' : '#fff'}" stroke="#56627A" stroke-width="1.5"/>`).join('')}</svg>`;
-        const p = el(`<div class="page" style="${catVars(catOf(a))}"><div class="ph"><div><div class="pnum">겨울 협동 컬러링</div><div class="pt">조각 ${k} / ${cols * rows}</div></div><div style="display:flex;gap:12px;align-items:center">${map}${nameLine()}</div></div><div style="flex:1;border:2px solid #1F2B45;overflow:hidden">${art(`${c * w} ${r * h} ${w} ${h}`)}</div></div>`);
+        const p = el(`<div class="page" data-act="${a.n}" style="${catVars(catOf(a))}"><div class="ph"><div><div class="pnum">겨울 협동 컬러링</div><div class="pt">조각 ${k} / ${cols * rows}</div></div><div style="display:flex;gap:12px;align-items:center">${map}${nameLine()}</div></div><div style="flex:1;border:2px solid #1F2B45;overflow:hidden">${art(`${c * w} ${r * h} ${w} ${h}`)}</div></div>`);
         $('svg:last-child', $('div[style*="flex:1"]', p)).setAttribute('preserveAspectRatio', 'none');
         pages.push(p);
       }
@@ -867,7 +912,7 @@
 
   /* ─── 롤링페이퍼 ─── */
   function rollPage(a, name) {
-    const p = el(`<div class="page" style="${catVars(catOf(a))};padding:34px"></div>`);
+    const p = el(`<div class="page" data-act="${a.n}" style="${catVars(catOf(a))};padding:34px"></div>`);
     const cells = Array.from({ length: 12 }, (_, i) => `<div style="border:1.5px dashed #B8C1CF;border-radius:${[18, 6, 26, 10][i % 4]}px;padding:10px;display:flex;flex-direction:column;justify-content:flex-end;font-size:12px;color:#8A95A8">From. ________</div>`);
     p.innerHTML = `<div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(5,1fr);gap:12px;position:relative">${cells.slice(0, 6).join('')}<div style="grid-column:1/4;display:flex;align-items:center;justify-content:center;gap:16px"><svg viewBox="0 0 40 40" style="width:44px;height:44px"><path d="M20 34s-13-8-13-17a7 7 0 0 1 13-4 7 7 0 0 1 13 4c0 9-13 17-13 17z" fill="var(--t)" stroke="var(--c)" stroke-width="2.5"/></svg><div style="font-size:52px;font-weight:700;letter-spacing:-1px">${esc(name || '_______')}<span style="font-size:28px;color:#56627A"> 에게</span></div></div>${cells.slice(6).join('')}</div><div style="text-align:center;font-size:14px;color:#8A95A8;margin-top:8px">${esc(className())} 친구들이 함께 쓴 한 해의 마음</div>`;
     return p;

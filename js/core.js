@@ -3,6 +3,7 @@
   const KEY = 'hakgimal-kit-v1';
   let mem = { pack: [], roster: [], grade: '', cls: '', teacher: '', school: '', data: {} };
   try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s) mem = Object.assign(mem, s); } catch (e) {}
+  if (window.ACTS) mem.pack = mem.pack.filter(n => ACTS.some(a => a.n === n));
   const Store = {
     get: () => mem,
     save() { try { localStorage.setItem(KEY, JSON.stringify(mem)); } catch (e) {} },

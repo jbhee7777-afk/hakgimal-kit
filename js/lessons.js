@@ -82,15 +82,18 @@
     const img = (s, cls) => s.img ? `<div class="lsn-img ${cls || ''} ${s.photo ? 'photo' : ''}"><img src="${s.img}" alt=""></div>` : '';
     function render(s) {
       if (s.t === 'cover') return `<div class="lsn-cover"><div class="lsn-ct"><div class="lsn-kicker">${esc(L.title)}</div><h1>${esc(s.title)}</h1><p>${esc(s.sub)}</p>${!s.end && L.plan ? `<div class="lsn-plan">${esc(L.plan)}</div>` : ''}</div>${img(s, s.photo ? '' : 'free')}</div>`;
-      if (s.t === 'list') return `<div class="lsn-two"><div><h2>${esc(s.title)}</h2><ul class="lsn-list">${s.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul>${more(s)}</div>${img(s)}</div>`;
+      if (s.t === 'list') return `<div class="lsn-two"><div><div class="lsn-kicker">생각 열기</div><h2>${esc(s.title)}</h2><ul class="lsn-list">${s.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul>${more(s)}</div>${img(s, s.free ? 'free' : '')}</div>`;
+      if (s.t === 'example') return `<div class="lsn-two"><div><h2>${esc(s.title)}</h2><div class="lsn-exbox"><span>예시</span><p>${esc(s.text)}</p></div><p class="lsn-hint" style="margin-top:26px">내 생각은 예시와 달라도 괜찮아요.</p></div>${img(s, 'free')}</div>`;
+      if (s.t === 'share') return `<div class="lsn-two"><div><div class="lsn-kicker">나눔과 정리</div><h2>${esc(s.title)}</h2><p class="lsn-big" style="font-weight:700">${esc(s.text)}</p><div class="lsn-pick lsn-stop">${Store.roster().length ? '<button class="btn huge dark" data-pick>발표할 친구 뽑기</button><b class="lsn-picked"></b>' : '<p class="lsn-hint">두세 명이 발표하고 박수를 보내요.</p>'}</div></div>${img(s, 'free')}</div>`;
       if (s.t === 'steps') return `<div class="lsn-two"><div><h2>${esc(s.title)}</h2><ol class="lsn-steps">${s.points.map(p => `<li>${esc(p)}</li>`).join('')}</ol><div class="lsn-warn">${esc(s.warn)}</div>${more(s)}</div>${img(s)}</div>`;
+      if (s.t === 'zodiac') return `<div class="lsn-goal"><h2>${esc(s.title)}</h2><div class="lsn-zod">${s.items.map((z, k) => `<div class="${s.mark[k] ? 'on' : ''}"><i>${k + 1}</i><b>${esc(z)}</b>${s.mark[k] ? `<span>${s.mark[k]}</span>` : ''}</div>`).join('')}</div><p class="lsn-hint" style="margin-top:26px">12가지 동물이 차례로 돌아가요. 12년이 지나면 다시 같은 띠!</p></div>`;
       if (s.t === 'goal') return `<div class="lsn-goal"><div class="lsn-kicker">${esc(L.title)}</div><h2>${esc(s.title)}</h2><p class="lsn-big">${esc(s.text)}</p><div class="lsn-flow">${s.flow.map(([t, m], k) => `<div><b>${k + 1}</b><span>${esc(t)}</span><i>${esc(m)}</i></div>`).join('')}</div></div>`;
       if (s.t === 'video') return `<div class="lsn-video"><div class="lsn-vside"><h2>${esc(s.title)}</h2><div class="lsn-look"><b>영상을 보며 찾아요</b>${s.look.map(q => `<p>${esc(q)}</p>`).join('')}</div><div class="lsn-src">${esc(s.v.src)} · ${esc(s.len)}</div></div><div class="lsn-player lsn-stop"><button class="lsn-play">${ICON.next}<span>영상 틀기</span></button></div></div>`;
       if (s.t === 'choose') return `<div class="lsn-two"><div><h2>${esc(s.title)}</h2><p class="lsn-hint">${esc(s.hint)}</p><div class="lsn-choose">${s.items.map(([t, ok], k) => `<button class="lsn-opt" data-ok="${ok}"><span class="k">${'①②③④'[k]}</span><span>${esc(t)}</span><span class="m"></span></button>`).join('')}</div></div>${img(s)}</div>`;
       if (s.t === 'ox') return `<div class="lsn-ox"><div class="lsn-kicker">O일까요, X일까요?</div><h2>${esc(s.title)}</h2><div class="lsn-oxrow"><button class="lsn-oxb" data-m="O">${ICON.O}</button><button class="lsn-oxb" data-m="X">${ICON.X}</button></div><p class="lsn-exp hide">${esc(s.e)}</p></div>`;
       if (s.t === 'calls') return `<div class="lsn-calls"><h2>${esc(s.title)}</h2><div class="lsn-callrow">${s.items.map(([n, w, d, c]) => `<div class="lsn-call" style="--cc:${c}"><b>${n}</b><span>${w}</span><p>${d}</p></div>`).join('')}</div><p class="lsn-hint">장난 전화는 하면 안 돼요. 정말 필요할 때만 걸어요.</p></div>`;
-      if (s.t === 'work') return `<div class="lsn-work"><div><h2>${esc(s.title)}</h2><div class="lsn-parts">${s.parts.map(([p, t, m]) => `<div><b>${p}</b><span>${esc(t)}</span><i>${m}</i></div>`).join('')}</div><p class="lsn-hint">연필과 색연필을 준비해요. 다 하면 손을 들어요.</p></div><div class="lsn-timer lsn-stop"><div class="lsn-time">${s.min}:00</div><div class="lsn-tbtn"><button class="btn huge dark" data-ts>시작</button><button class="btn huge" data-tr>다시</button></div></div></div>`;
-      if (s.t === 'answers') return `<div class="lsn-ans"><h2>${esc(s.title)}</h2><div class="lsn-rows">${s.rows.map(([k, v]) => `<button class="lsn-row lsn-stop"><b>${esc(k)}</b><span class="v">${esc(v)}</span><span class="tap">눌러서 보기</span></button>`).join('')}</div></div>`;
+      if (s.t === 'work') return `<div class="lsn-work"><div><h2>${esc(s.title)}</h2><div class="lsn-parts">${s.parts.map(([p, t, m]) => `<div><b>${p}</b><span>${esc(t)}</span><i>${m}</i></div>`).join('')}</div><p class="lsn-hint">연필과 색연필을 준비해요. 다 하면 손을 들어요.</p>${L.key ? '<button class="lsn-more lsn-stop" data-key>예시 답안 보기 (선생님)</button>' : ''}${s.tool ? '<button class="lsn-more lsn-stop" data-tool>활동 화면 열기</button>' : ''}${L.pages && !L.key ? '<button class="lsn-more lsn-stop" data-printw>활동지 인쇄</button>' : ''}</div><div class="lsn-timer lsn-stop"><div class="lsn-time">${s.min}:00</div><div class="lsn-tbtn"><button class="btn huge dark" data-ts>시작</button><button class="btn huge" data-tr>다시</button></div></div></div>`;
+      if (s.t === 'answers') return `<div class="lsn-ans"><h2>${esc(s.title)}</h2><div class="lsn-rows">${s.rows.map(([k, v]) => `<button class="lsn-row lsn-stop"><b>${esc(k)}</b><span class="v">${esc(v)}</span><span class="tap">눌러서 보기</span></button>`).join('')}</div>${L.key ? '<button class="lsn-more lsn-stop" data-key>예시 정답지 전체 보기</button>' : ''}</div>`;
       if (s.t === 'do') return `<div class="lsn-do"><div class="lsn-dot"><div class="lsn-stepn">${s.n}<small> / ${s.total}</small></div><h2>${esc(s.title)}</h2><p class="lsn-big">${esc(s.text)}</p><div class="lsn-dtimer lsn-stop"><span class="lsn-time sm">${s.min}:00</span><button class="btn huge dark" data-ts>${s.min}분 시작</button></div></div>${img(s)}</div>`;
       return '';
     }
@@ -110,6 +113,11 @@
       $$('.lsn-opt', slide).forEach(b => b.onclick = () => { const ok = b.dataset.ok === '1'; b.classList.add(ok ? 'ok' : 'no'); $('.m', b).innerHTML = ok ? ICON.O : ICON.X; beep(ok ? 'ok' : 'no'); });
       $$('.lsn-oxb', slide).forEach(b => b.onclick = () => { $$('.lsn-oxb', slide).forEach(x => x.classList.add(x.dataset.m === s.a ? 'right' : 'dim')); $('.lsn-exp', slide).classList.remove('hide'); beep('ok'); });
       $$('.lsn-row', slide).forEach(b => b.onclick = () => { b.classList.add('open'); beep('pop'); });
+      $$('[data-key]', slide).forEach(b => b.onclick = () => window.__showKey && window.__showKey());
+      $$('[data-tool]', slide).forEach(b => b.onclick = () => window.__toTool && window.__toTool());
+      $$('[data-printw]', slide).forEach(b => b.onclick = () => window.__printWork && window.__printWork());
+      const pk = $('[data-pick]', slide);
+      if (pk) { const used = window.__picked || (window.__picked = new Set()); pk.onclick = () => { const r = Store.roster(); let pool = r.filter(n => !used.has(n)); if (!pool.length) { used.clear(); pool = r.slice(); } const out = $('.lsn-picked', slide); let k = 0; const iv = setInterval(() => { out.textContent = pickOne(r); beep('tick'); if (++k > 12) { clearInterval(iv); const n = pickOne(pool); used.add(n); out.textContent = n; beep('fan'); } }, 70); }; }
       const ts = $('[data-ts]', slide);
       if (ts) {
         let left = s.min * 60, iv = null; const tv = $('.lsn-time', slide);
@@ -125,32 +133,32 @@
 
   /* ───── 안전교육 활동지 ───── */
   const box = '<svg viewBox="0 0 30 30" style="width:30px;height:30px;flex:none"><rect x="3" y="3" width="24" height="24" rx="5" fill="none" stroke="#56627A" stroke-width="2"/></svg>';
-  const qh = (n, t) => `<div style="display:flex;gap:10px;align-items:center;font-size:20px;font-weight:700;margin-top:4px"><span style="width:34px;height:34px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-size:18px;flex:none">${n}</span>${t}</div>`;
+  const qh = (n, t, img) => `<div style="display:flex;gap:10px;align-items:center;font-size:20px;font-weight:700;margin-top:4px"><span style="width:36px;height:36px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-size:18px;flex:none;box-shadow:0 0 0 4px var(--t)">${n}</span><span style="flex:1">${t}</span>${img ? `<img class="qimg" src="${img}" alt="" style="width:54px;height:54px">` : ''}</div>`;
   function head(a, title, guide) { return pageFrame(a, title, guide); }
   function safetyP1(a) {
     const p = head(a, '1쪽 겨울방학 안전 탐정', '영상을 떠올리며 알맞은 것을 골라요.');
     p.insertAdjacentHTML('beforeend', `
-      ${qh(1, '빙판길에서 바르게 걷는 방법 두 가지에 ○ 하세요.')}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${['① 주머니에 손을 넣고 걸어요', '② 장갑을 끼고 손을 빼고 걸어요', '③ 친구와 신나게 뛰어가요', '④ 작은 걸음으로 천천히 걸어요'].map(t => `<div style="border:2px solid #CDD5E1;border-radius:16px;padding:16px 18px;font-size:19px;display:flex;align-items:center;justify-content:space-between;gap:10px">${t}<svg viewBox="0 0 40 40" style="width:40px;height:40px;flex:none"><circle cx="20" cy="20" r="16" fill="none" stroke="#CDD5E1" stroke-width="2" stroke-dasharray="4 4"/></svg></div>`).join('')}</div>
+      ${qh(1, '빙판길에서 바르게 걷는 방법 두 가지에 ○ 하세요.', 'slides/safety/icy.jpg')}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">${['① 주머니에 손을 넣고 걸어요', '② 장갑을 끼고 손을 빼고 걸어요', '③ 친구와 신나게 뛰어가요', '④ 작은 걸음으로 천천히 걸어요'].map(t => `<div style="border:2px solid #CDD5E1;border-radius:16px;padding:11px 16px;font-size:18px;display:flex;align-items:center;justify-content:space-between;gap:10px">${t}<svg viewBox="0 0 40 40" style="width:40px;height:40px;flex:none"><circle cx="20" cy="20" r="16" fill="none" stroke="#CDD5E1" stroke-width="2" stroke-dasharray="4 4"/></svg></div>`).join('')}</div>
       ${qh(2, '핫팩 이야기예요. 맞으면 O, 틀리면 X를 써요.')}
-      <div style="display:flex;flex-direction:column;gap:10px">${['① 핫팩은 옷 위에 붙여요.', '② 핫팩을 붙인 채로 잠을 자요.', '③ 피부가 빨개지거나 따가우면 바로 떼요.'].map(t => `<div style="display:flex;align-items:center;justify-content:space-between;font-size:19px;border-bottom:1.5px dashed #CDD5E1;padding:8px 4px">${t}<span style="display:flex;gap:8px;align-items:center;font-size:15px;color:#56627A">( <i style="display:inline-block;width:46px;height:40px;border:2px solid #9AA6B8;border-radius:8px"></i> )</span></div>`).join('')}</div>
-      ${qh(3, '손발이 꽁꽁 얼었을 때! 순서대로 1, 2, 3을 써요.')}
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">${[['(가)', '따뜻한 물로 천천히 녹여요'], ['(나)', '따뜻한 곳으로 들어가요'], ['(다)', '젖은 장갑과 양말을 벗어요']].map(([k, t]) => `<div style="border:2px solid #CDD5E1;border-radius:16px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center"><i style="width:56px;height:56px;border:2.5px solid var(--c);border-radius:50%;display:block"></i><b style="font-size:16px;color:var(--c)">${k}</b><span style="font-size:17px;word-break:keep-all">${t}</span><div style="width:100%;height:120px;border:1.5px dashed #CDD5E1;border-radius:10px;font-size:12px;color:#8A95A8;display:grid;place-items:center">그림</div></div>`).join('')}</div>
+      <div style="display:flex;flex-direction:column;gap:10px">${['① 핫팩은 옷 위에 붙여요.', '② 핫팩을 붙인 채로 잠을 자요.', '③ 피부가 빨개지거나 따가우면 바로 떼요.'].map(t => `<div style="display:flex;align-items:center;justify-content:space-between;font-size:18px;border-bottom:1.5px dashed #CDD5E1;padding:4px 4px">${t}<span style="display:flex;gap:8px;align-items:center;font-size:15px;color:#56627A">( <i style="display:inline-block;width:46px;height:40px;border:2px solid #9AA6B8;border-radius:8px"></i> )</span></div>`).join('')}</div>
+      ${qh(3, '손발이 꽁꽁 얼었을 때! 순서대로 1, 2, 3을 써요.', 'slides/safety/warm.jpg')}
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">${[['(가)', '따뜻한 물로 천천히 녹여요'], ['(나)', '따뜻한 곳으로 들어가요'], ['(다)', '젖은 장갑과 양말을 벗어요']].map(([k, t]) => `<div style="border:2px solid #CDD5E1;border-radius:16px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center"><i style="width:48px;height:48px;border:2.5px solid var(--c);border-radius:50%;display:block"></i><b style="font-size:16px;color:var(--c)">${k}</b><span style="font-size:17px;word-break:keep-all">${t}</span></div>`).join('')}</div>
       <div style="font-size:16px;color:#56627A">하면 안 되는 것: 세게 문지르기, 아주 뜨거운 물에 넣기</div>`);
     return p;
   }
   function safetyP2(a) {
     const p = head(a, '2쪽 이럴 땐 이렇게!', '그림으로 그리고, 도움 전화 카드를 꾸며서 오려요.');
     p.insertAdjacentHTML('beforeend', `
-      ${qh(4, '집에 혼자 있는데 초인종이 울렸어요. 나는 어떻게 할까요?')}
-      <div class="box" data-grow style="height:330px;position:relative"><span class="bl">내가 하는 행동을 그려요</span>
+      ${qh(4, '집에 혼자 있는데 초인종이 울렸어요. 나는 어떻게 할까요?', 'slides/safety/home.jpg')}
+      <div class="box" data-grow style="height:290px;position:relative"><span class="bl">내가 하는 행동을 그려요</span>
         <svg viewBox="0 0 260 120" style="position:absolute;right:18px;top:20px;width:260px;height:120px"><path d="M130 6c66 0 122 22 122 50s-56 50-122 50c-14 0-28-1-40-3L52 116l10-22C30 85 8 72 8 56 8 28 64 6 130 6z" fill="#fff" stroke="#8A95A8" stroke-width="2.5"/><text x="130" y="60" text-anchor="middle" font-family="Miso" font-size="15" fill="#B8C1CF">내가 하는 말</text></svg></div>
       ${qh(5, '도움 전화 카드를 완성하고 예쁘게 꾸며요.')}
       <div style="border:2.5px dashed #9AA6B8;border-radius:22px;padding:22px 26px;position:relative;display:grid;grid-template-columns:1fr 1fr;gap:16px">${ICON.scissor.replace('class="scissor"', 'class="scissor" style="position:absolute;top:-13px;left:20px"')}
         <div style="grid-column:1/3;text-align:center;font-size:26px;font-weight:700;letter-spacing:4px;color:var(--c)">우리 집 도움 전화</div>
         ${[['경찰', '위험한 사람, 길을 잃었을 때'], ['소방·구급', '불이 났을 때, 크게 다쳤을 때']].map(([w, d]) => `<div style="border:2px solid #CDD5E1;border-radius:16px;padding:12px 16px"><div style="font-size:15px;color:#56627A">${d}</div><div style="display:flex;align-items:center;gap:10px;margin-top:6px"><b style="font-size:20px">${w}</b><span style="flex:1;height:52px;border:2px solid #9AA6B8;border-radius:10px"></span></div></div>`).join('')}
         ${['엄마', '아빠 (또는 보호자)'].map(w => `<div style="display:flex;align-items:flex-end;gap:10px;font-size:18px">${w}<span style="flex:1;border-bottom:2px solid #9AA6B8;height:36px"></span></div>`).join('')}
-        <div style="grid-column:1/3;height:110px;border:1.5px dashed #CDD5E1;border-radius:14px;display:grid;place-items:center;color:#8A95A8;font-size:14px">카드를 꾸며요 (그림, 무늬)</div></div>`);
+        <div style="grid-column:1/3;height:80px;border:1.5px dashed #CDD5E1;border-radius:14px;display:grid;place-items:center;color:#8A95A8;font-size:14px">카드를 꾸며요 (그림, 무늬)</div></div>`);
     return p;
   }
   function safetyP3(a) {

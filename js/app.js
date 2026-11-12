@@ -6,9 +6,10 @@
 
   function topbar() {
     const n = Store.get().pack.length;
-    const t = el(`<header class="top"><a class="brand" href="#/"><b>학기말 꾸러미</b><span>2026학년도 마무리와 2027년 새 출발, 활동 80가지</span></a>
+    const t = el(`<header class="top"><a class="brand" href="#/"><b>학기말 꾸러미</b><span>2026학년도 마무리와 2027년 새 출발, 활동 ${ACTS.length}가지</span></a>
       <label class="search">${ICON.search}<input type="search" placeholder="활동 이름으로 찾기" aria-label="활동 찾기" value="${esc(view.q)}"></label>
       <button class="btn flat" data-set>${ICON.people} 우리 반 정보</button>
+      <a class="btn" href="#/gallery">작품 모음</a>
       <a class="btn dark packbtn" href="#/pack">내 꾸러미 <span class="count">${n}</span></a></header>`);
     const inp = $('input', t);
     inp.oninput = () => { view.q = inp.value.trim(); renderList(); };
@@ -33,7 +34,7 @@
     const b = el('<div class="binder"><nav class="tabs" aria-label="활동 분류"></nav><section class="sheetpanel"></section></div>');
     app.appendChild(b);
     const nav = $('.tabs', b);
-    const tabs = [['all', '80가지 전체', ACTS.length, '#1F2B45', '#FBFCFE'], ['star', '추천 모음', ACTS.filter(a => a.star).length, '#A06A00', '#FFF6DA']]
+    const tabs = [['all', `${ACTS.length}가지 전체`, ACTS.length, '#1F2B45', '#FBFCFE'], ['star', '추천 모음', ACTS.filter(a => a.star).length, '#A06A00', '#FFF6DA']]
       .concat(CATS.map(c => [String(c.id), c.name, ACTS.filter(a => a.c === c.id).length, c.ink, c.tint]));
     tabs.forEach(([id, name, cnt, ink, tint], k) => {
       const t = el(`<button class="tab ${k === 2 ? 'sep' : ''} ${view.tab === id ? 'on' : ''}" style="--c:${ink};--t:${tint}"><span>${esc(name)}</span><span class="cnt">${cnt}</span></button>`);
@@ -139,20 +140,32 @@
     };
     const runL = () => {
       runLesson(a, stage, ctx);
-      if (L.pages) {
-        ctx.print(() => printPages(L.pages(a)));
-        const b1 = el('<button class="btn dark">활동지 인쇄 (아이들용)</button>'); b1.onclick = () => printPages(L.pages(a));
+      window.__toTool = () => set('tool');
+      const showOnly = (pages, label) => { stage.innerHTML = ''; const sb = el('<div class="stagebody"></div>'); const back = el(`<div style="display:flex;gap:10px;padding:10px 16px;background:var(--paper);border-bottom:1.5px solid var(--rule);align-items:center"><b style="font-size:18px">${label}</b><span style="flex:1"></span><button class="btn dark">수업 슬라이드로 돌아가기</button></div>`); $('button', back).onclick = () => { stage.innerHTML = ''; runLesson(a, stage, ctx); }; stage.append(back, sb); showPaper(sb, pages); };
+      const workPages = L.pages ? () => L.pages(a) : (TOOLS[a.tool].pages ? () => TOOLS[a.tool].pages(a) : null);
+      if (L.key) {
+        const b0 = el('<button class="btn dark big" style="justify-content:center">예시 답안 보기</button>'); b0.onclick = () => showOnly(L.key(a), '예시 정답지 (선생님용)');
         const b2 = el('<button class="btn">예시 정답지 인쇄 (선생님용)</button>'); b2.onclick = () => printPages(L.key(a));
-        const b3 = el('<button class="btn flat">활동지 미리 보기</button>'); b3.onclick = () => { stage.innerHTML = ''; const sb = el('<div class="stagebody"></div>'); stage.appendChild(sb); showPaper(sb, [...L.pages(a), ...L.key(a)]); };
-        ctx.opts.append(b1, b2, b3);
+        window.__showKey = () => showOnly(L.key(a), '예시 정답지 (선생님용)');
+        ctx.opts.prepend(b0); ctx.opts.append(b2);
+      }
+      if (workPages) {
+        window.__printWork = () => printPages(workPages());
+        ctx.print(() => printPages(workPages()));
+        const b1 = el('<button class="btn dark">활동지 인쇄 (아이들용)</button>'); b1.onclick = () => printPages(workPages());
+        const b3 = el('<button class="btn flat">활동지 미리 보기</button>'); b3.onclick = () => showOnly(workPages(), '아이들 활동지');
+        ctx.opts.append(b1, b3);
+      } else if (a.tool !== 'sheet') {
+        const bt = el(`<button class="btn">${esc(TOOL_KIND[a.tool])} 화면 열기</button>`); bt.onclick = () => set('tool'); ctx.opts.append(bt);
       }
       if (L.ppt) { const d = el(`<a class="btn" href="${L.ppt}" download>PPT 파일 받기 (Canva)</a>`); ctx.opts.append(d); }
       ctx.opts.append(el('<p class="hint">전자칠판에서 화면 오른쪽을 누르거나 밀면 다음 장, 왼쪽을 누르면 이전 장으로 가요. 크게 보기 단추로 전체 화면을 써요.</p>'));
     };
+    let set = () => {};
     if (L) {
       const ms = el(`<div class="modeseg"><button data-m="lesson">수업 슬라이드<small>${esc(L.plan)}</small></button><button data-m="tool">${esc(TOOL_KIND[a.tool])}<small>${a.tool === 'roles' ? '청소 구역 뽑기와 완료 체크' : '활동 도구'}</small></button></div>`);
       $('.aside', v).insertBefore(ms, $('.opts', v));
-      const set = m => { mode = m; Store.set('mode:' + n, m); $$('button', ms).forEach(b => b.classList.toggle('on', b.dataset.m === m)); clearTimers(); stage.innerHTML = ''; ctx.opts.innerHTML = ''; pr.hidden = true; m === 'lesson' ? runL() : runTool(); };
+      set = m => { mode = m; Store.set('mode:' + n, m); $$('button', ms).forEach(b => b.classList.toggle('on', b.dataset.m === m)); clearTimers(); stage.innerHTML = ''; ctx.opts.innerHTML = ''; pr.hidden = true; m === 'lesson' ? runL() : runTool(); };
       $$('button', ms).forEach(b => b.onclick = () => set(b.dataset.m));
       set(mode);
     } else runTool();
@@ -185,6 +198,7 @@
     const m = h.match(/^#\/a\/(\d+)/);
     if (m) return renderAct(+m[1], /[?&]pack/.test(h));
     if (h.startsWith('#/pack')) return renderPack();
+    if (h.startsWith('#/gallery')) { const fa = h.match(/act=(\d+)/); return renderGallery(app, topbar, fa ? +fa[1] : 0); }
     renderHome();
   }
   window.addEventListener('hashchange', route);
