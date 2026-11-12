@@ -75,19 +75,24 @@
       $$('button', dots).forEach((d, k) => d.classList.toggle('on', k === i));
       $('.lsn-count', wrap).textContent = `${i + 1} / ${S.length}`;
       slide.className = 'lsn-slide t-' + s.t;
+      slide.style.backgroundImage = s.bg ? `linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.55)), url(${s.bg})` : '';
+      slide.style.backgroundSize = 'cover';
       slide.innerHTML = render(s);
       bind(s);
       fit();
     }
     const img = (s, cls) => s.img ? `<div class="lsn-img ${cls || ''} ${s.photo ? 'photo' : ''}"><img src="${s.img}" alt=""></div>` : '';
     function render(s) {
-      if (s.t === 'cover') return `<div class="lsn-cover"><div class="lsn-ct"><div class="lsn-kicker">${esc(L.title)}</div><h1>${esc(s.title)}</h1><p>${esc(s.sub)}</p>${!s.end && L.plan ? `<div class="lsn-plan">${esc(L.plan)}</div>` : ''}</div>${img(s, s.photo ? '' : 'free')}</div>`;
+      if (s.t === 'cover') return `<div class="lsn-cover"><div class="lsn-ct"><div class="lsn-kicker">${esc(L.title)}</div><h1>${esc(s.title)}</h1><p>${esc(s.sub)}</p></div>${img(s, s.photo ? '' : 'free')}</div>`;
       if (s.t === 'list') return `<div class="lsn-two"><div><div class="lsn-kicker">생각 열기</div><h2>${esc(s.title)}</h2><ul class="lsn-list">${s.points.map(p => `<li>${esc(p)}</li>`).join('')}</ul>${more(s)}</div>${img(s, s.free ? 'free' : '')}</div>`;
       if (s.t === 'example') return `<div class="lsn-two"><div><h2>${esc(s.title)}</h2><div class="lsn-exbox"><span>예시</span><p>${esc(s.text)}</p></div><p class="lsn-hint" style="margin-top:26px">내 생각은 예시와 달라도 괜찮아요.</p></div>${img(s, 'free')}</div>`;
       if (s.t === 'share') return `<div class="lsn-two"><div><div class="lsn-kicker">나눔과 정리</div><h2>${esc(s.title)}</h2><p class="lsn-big" style="font-weight:700">${esc(s.text)}</p><div class="lsn-pick lsn-stop">${Store.roster().length ? '<button class="btn huge dark" data-pick>발표할 친구 뽑기</button><b class="lsn-picked"></b>' : '<p class="lsn-hint">두세 명이 발표하고 박수를 보내요.</p>'}</div></div>${img(s, 'free')}</div>`;
       if (s.t === 'steps') return `<div class="lsn-two"><div><h2>${esc(s.title)}</h2><ol class="lsn-steps">${s.points.map(p => `<li>${esc(p)}</li>`).join('')}</ol><div class="lsn-warn">${esc(s.warn)}</div>${more(s)}</div>${img(s)}</div>`;
+      if (s.t === 'sheetex') return `<div class="lsn-two lsn-sx"><div><h2>${esc(s.title)}</h2>${s.steps ? `<ol class="lsn-steps">${s.steps.map(p => `<li>${esc(p)}</li>`).join('')}</ol>` : `<div class="lsn-exbox"><span>예시</span><p>${esc(s.text)}</p></div><p class="lsn-hint" style="margin-top:22px">글과 그림은 내 생각대로 바꿔도 좋아요.</p>`}</div><div class="lsn-sheet lsn-stop"></div></div>`;
+      if (s.t === 'gallery3') return `<div class="lsn-goal"><h2>${esc(s.title)}</h2><div class="lsn-g3">${s.items.map(([im, t, d]) => `<div><div class="g3img"><img src="${im}" alt=""></div><b>${esc(t)}</b><span>${esc(d)}</span></div>`).join('')}</div></div>`;
+      if (s.t === 'colors') return `<div class="lsn-goal"><h2>${esc(s.title)}</h2><div class="lsn-cols">${s.items.map(([k, n, col], i) => `<div class="${i === s.mark ? 'on' : ''}"><i style="background:${col}"></i><b>${esc(k)}</b><span>${esc(n)}</span></div>`).join('')}</div><p class="lsn-big" style="margin-top:34px;font-size:40px">${esc(s.text)}</p></div>`;
       if (s.t === 'zodiac') return `<div class="lsn-goal"><h2>${esc(s.title)}</h2><div class="lsn-zod">${s.items.map((z, k) => `<div class="${s.mark[k] ? 'on' : ''}"><i>${k + 1}</i><b>${esc(z)}</b>${s.mark[k] ? `<span>${s.mark[k]}</span>` : ''}</div>`).join('')}</div><p class="lsn-hint" style="margin-top:26px">12가지 동물이 차례로 돌아가요. 12년이 지나면 다시 같은 띠!</p></div>`;
-      if (s.t === 'goal') return `<div class="lsn-goal"><div class="lsn-kicker">${esc(L.title)}</div><h2>${esc(s.title)}</h2><p class="lsn-big">${esc(s.text)}</p><div class="lsn-flow">${s.flow.map(([t, m], k) => `<div><b>${k + 1}</b><span>${esc(t)}</span><i>${esc(m)}</i></div>`).join('')}</div></div>`;
+      if (s.t === 'goal') return `<div class="lsn-goal"><div class="lsn-kicker">${esc(L.title)}</div><h2>${esc(s.title)}</h2><p class="lsn-big">${esc(s.text)}</p></div>`;
       if (s.t === 'video') return `<div class="lsn-video"><div class="lsn-vside"><h2>${esc(s.title)}</h2><div class="lsn-look"><b>영상을 보며 찾아요</b>${s.look.map(q => `<p>${esc(q)}</p>`).join('')}</div><div class="lsn-src">${esc(s.v.src)} · ${esc(s.len)}</div></div><div class="lsn-player lsn-stop"><button class="lsn-play">${ICON.next}<span>영상 틀기</span></button></div></div>`;
       if (s.t === 'choose') return `<div class="lsn-two"><div><h2>${esc(s.title)}</h2><p class="lsn-hint">${esc(s.hint)}</p><div class="lsn-choose">${s.items.map(([t, ok], k) => `<button class="lsn-opt" data-ok="${ok}"><span class="k">${'①②③④'[k]}</span><span>${esc(t)}</span><span class="m"></span></button>`).join('')}</div></div>${img(s)}</div>`;
       if (s.t === 'ox') return `<div class="lsn-ox"><div class="lsn-kicker">O일까요, X일까요?</div><h2>${esc(s.title)}</h2><div class="lsn-oxrow"><button class="lsn-oxb" data-m="O">${ICON.O}</button><button class="lsn-oxb" data-m="X">${ICON.X}</button></div><p class="lsn-exp hide">${esc(s.e)}</p></div>`;
@@ -114,6 +119,7 @@
       $$('.lsn-oxb', slide).forEach(b => b.onclick = () => { $$('.lsn-oxb', slide).forEach(x => x.classList.add(x.dataset.m === s.a ? 'right' : 'dim')); $('.lsn-exp', slide).classList.remove('hide'); beep('ok'); });
       $$('.lsn-row', slide).forEach(b => b.onclick = () => { b.classList.add('open'); beep('pop'); });
       $$('[data-key]', slide).forEach(b => b.onclick = () => window.__showKey && window.__showKey());
+      if (s.t === 'sheetex' && s.page) { const box = $('.lsn-sheet', slide); let pg = null; try { pg = s.page(); } catch (e) {} if (pg) { const sc = 740 / 1123; const w = el(`<div style="width:${794 * sc}px;height:${1123 * sc}px;position:relative"></div>`); pg.style.cssText += `;position:absolute;left:0;top:0;transform:scale(${sc});transform-origin:top left;box-shadow:0 14px 40px rgba(31,43,69,.2)`; w.appendChild(pg); box.appendChild(w); requestAnimationFrame(() => window.fillPage && fillPage(pg)); } }
       $$('[data-tool]', slide).forEach(b => b.onclick = () => window.__toTool && window.__toTool());
       $$('[data-printw]', slide).forEach(b => b.onclick = () => window.__printWork && window.__printWork());
       const pk = $('[data-pick]', slide);

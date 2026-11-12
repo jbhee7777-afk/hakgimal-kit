@@ -111,6 +111,7 @@
   function shrink(c, max) { const s = Math.min(1, max / Math.max(c.width, c.height)); if (s === 1) return c; const t = document.createElement('canvas'); t.width = Math.round(c.width * s); t.height = Math.round(c.height * s); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height); return t; }
   const toBlob = (c, q) => new Promise(ok => c.toBlob(ok, 'image/jpeg', q));
 
+  const noteCache = {};
   async function importFiles(files, onStep) {
     let done = 0, sorted = 0, total = 0;
     for (const f of files) {
@@ -119,9 +120,21 @@
         let c = pg.canvas; const q = readQR(c);
         let act = 0, pno = 0, stu = 0;
         if (q) { const [, a, p, s] = q.data.split('|'); act = +a || 0; pno = +p || 0; stu = +s || 0; if (q.rot === 180) c = rotate180(c); sorted++; }
-        const big = shrink(c, 1700), th = shrink(c, 360);
-        const w = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), act, pg: pno, stu, src: pg.src, added: Date.now(), blob: await toBlob(big, .84), thumb: th.toDataURL('image/jpeg', .7) };
-        await W.put(w);
+        if (act && window.NOTE_ACTS && NOTE_ACTS.includes(act)) {
+          /* 쪽지 종이: 칸마다 잘라서 한 장씩 저장 */
+          const fr = noteCache[act] || (noteCache[act] = noteFractions(act));
+          for (let k = 0; k < fr.length; k++) {
+            const [fx, fy, fw, fh] = fr[k], cut = document.createElement('canvas');
+            cut.width = Math.round(fw * c.width); cut.height = Math.round(fh * c.height);
+            cut.getContext('2d').drawImage(c, fx * c.width, fy * c.height, cut.width, cut.height, 0, 0, cut.width, cut.height);
+            const nb = shrink(cut, 900), nt = shrink(cut, 300);
+            await W.put({ id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), act, pg: (pno - 1) * 4 + k + 1, stu: 0, note: 1, src: pg.src, added: Date.now(), blob: await toBlob(nb, .86), thumb: nt.toDataURL('image/jpeg', .75) });
+          }
+        } else {
+          const big = shrink(c, 1700), th = shrink(c, 360);
+          const w = { id: Date.now() + '-' + Math.random().toString(36).slice(2, 7), act, pg: pno, stu, src: pg.src, added: Date.now(), blob: await toBlob(big, .84), thumb: th.toDataURL('image/jpeg', .7) };
+          await W.put(w);
+        }
         done++; onStep && onStep(done, pg, !!q, sorted);
       }
     }
@@ -130,7 +143,7 @@
   window.importScans = importFiles;
 
   /* ───── 작품 모음 화면 ───── */
-  const actName = n => { const a = actBy(n); return a ? `${a.n}. ${a.name}` : '분류가 필요한 작품'; };
+  const actName = n => { const a = actBy(n); return a ? `${a.no}. ${a.name}` : '분류가 필요한 작품'; };
   const kidName = s => { const r = Store.roster(); return s ? `${s}번${r[s - 1] ? ' ' + r[s - 1] : ''}` : '이름 미정'; };
   let view = { by: 'act' };
   window.renderGallery = async function (app, topbar, focusAct) {
@@ -198,7 +211,7 @@
       const as = $('.gassign', ov); as.innerHTML = '';
       if (!w.act || !w.stu) {
         as.innerHTML = '<p class="hint">이 작품이 무엇인지 눌러서 정해 주세요.</p>';
-        if (!w.act) { const s = el(`<select class="field"><option value="">어떤 활동인가요?</option>${ACTS.map(a => `<option value="${a.n}">${a.n}. ${esc(a.name)}</option>`).join('')}</select>`); s.onchange = async () => { w.act = +s.value; await W.put(w); changed = true; show(); }; as.appendChild(s); }
+        if (!w.act) { const s = el(`<select class="field"><option value="">어떤 활동인가요?</option>${ACTS.map(a => `<option value="${a.n}">${a.no}. ${esc(a.name)}</option>`).join('')}</select>`); s.onchange = async () => { w.act = +s.value; await W.put(w); changed = true; show(); }; as.appendChild(s); }
         const r = Store.roster();
         if (!w.stu && r.length) { const kb = el('<div class="gkids"></div>'); r.forEach((n, k) => { const b = el(`<button>${k + 1} ${esc(n)}</button>`); b.onclick = async () => { w.stu = k + 1; await W.put(w); changed = true; show(); }; kb.appendChild(b); }); as.appendChild(kb); }
       }

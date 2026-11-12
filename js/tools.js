@@ -742,14 +742,14 @@
       mn.onclick = () => { sel = m; $$('.mini', left).forEach(x => x.classList.remove('on')); mn.classList.add('on'); showPaper(right, [calPage(a, m)]); };
       left.appendChild(mn);
     }
-    let per = Store.d('cal:per', 4);
+    let per = Store.d('cal:per', 6);
     const preview = () => showPaper(right, per === 1 ? [calPage(a, sel)] : calSheets(a, per).slice(0, 1));
     preview();
     ctx.print(() => printPages(per === 1 ? Array.from({ length: 12 }, (_, k) => calPage(a, k + 1)) : calSheets(a, per)));
     const info = el('<p class="hint"></p>');
-    const upd = () => { const n = per === 1 ? 12 : 12 / per; const kids = Store.roster().length || 24; info.innerHTML = `한 사람에 <b>${n}장</b>이에요. ${kids}명이면 <b>${n * kids}장</b>이 필요해요.`; };
+    const upd = () => { const n = per === 1 ? 12 : 12 / per; if (per === 6) { const kids = Store.roster().length || 24; info.innerHTML = `한 사람에 <b>종이 1장 (양면)</b>이에요. ${kids}명이면 <b>${kids}장</b>이면 돼요. 프린터에서 "양면 인쇄"를 골라 주세요.`; return; } const kids = Store.roster().length || 24; info.innerHTML = `한 사람에 <b>${n}장</b>이에요. ${kids}명이면 <b>${n * kids}장</b>이 필요해요.`; };
     const segc = el('<div class="seg"></div>');
-    [[4, '한 장에 4달 (3장)'], [2, '한 장에 2달 (6장)'], [12, '한 장에 12달 (1장)'], [1, '한 장에 1달 (12장)']].forEach(([v, t]) => { const b = el(`<button class="${v === per ? 'on' : ''}">${t}</button>`); b.onclick = () => { per = v; Store.set('cal:per', v); $$('button', segc).forEach(x => x.classList.remove('on')); b.classList.add('on'); upd(); preview(); }; segc.appendChild(b); });
+    [[6, '앞뒤 한 장 (앞 1~6월, 뒤 7~12월)'], [4, '한 장에 4달 (3장)'], [12, '한 장에 12달 (1장)'], [1, '한 장에 1달 (12장)']].forEach(([v, t]) => { const b = el(`<button class="${v === per ? 'on' : ''}">${t}</button>`); b.onclick = () => { per = v; Store.set('cal:per', v); $$('button', segc).forEach(x => x.classList.remove('on')); b.classList.add('on'); upd(); preview(); }; segc.appendChild(b); });
     const lab = el('<label class="f">인쇄 방법</label>'); lab.appendChild(segc);
     const cls = el('<button class="btn">우리 반 달력 하나 만들기 (12장)</button>'); cls.onclick = () => printPages(Array.from({ length: 12 }, (_, k) => calPage(a, k + 1)));
     ctx.opts.append(lab, info, cls, el('<p class="hint">"우리 반 달력"은 한 달씩 나눠 맡아 그림을 그리고 모아서 교실 달력 하나로 만들어요. 종이가 가장 적게 들어요. 빨간 날은 일요일과 공휴일이에요.</p>'));
@@ -757,21 +757,21 @@
   };
   /* 여러 달을 한 장에 */
   function calSheets(a, per) {
-    const pages = [], cols = per === 12 ? 3 : per === 4 ? 2 : 1;
-    const dh = per === 12 ? 0 : per === 4 ? 120 : 170, rh = per === 12 ? 17 : per === 4 ? 30 : 36, fs = per === 12 ? 11 : per === 4 ? 13 : 16;
+    const pages = [], cols = per === 12 ? 3 : per === 4 || per === 6 ? 2 : 1;
+    const dh = per === 12 ? 0 : per === 6 ? 64 : per === 4 ? 120 : 170, rh = per === 12 ? 17 : per === 6 ? 17 : per === 4 ? 30 : 36, fs = per === 12 ? 11 : per === 6 ? 12 : per === 4 ? 13 : 16;
     for (let s = 1; s <= 12; s += per) {
-      const p = pageFrame(a, per === 12 ? '2027 나의 달력' : `2027 달력 (${s}~${s + per - 1}월)`, per === 12 ? '좋아하는 달에 동그라미하고, 빈 곳에 새해 그림을 그려요.' : '달마다 위 칸에 그 달의 그림을 그리고, 중요한 날에 표시해요.');
+      const p = pageFrame(a, per === 12 ? '2027 나의 달력' : per === 6 ? `2027 나의 달력 (${s === 1 ? '앞면' : '뒷면'}: ${s}~${s + 5}월)` : `2027 달력 (${s}~${s + per - 1}월)`, per === 12 ? '좋아하는 달에 동그라미하고, 빈 곳에 새해 그림을 그려요.' : '달마다 위 칸에 그 달의 그림을 그리고, 중요한 날에 표시해요.');
       const months = Array.from({ length: per }, (_, k) => s + k);
-      p.insertAdjacentHTML('beforeend', `${per === 12 ? `<div style="display:flex;align-items:center;gap:12px;background:#FFE9E4;border-radius:14px;padding:6px 14px"><img src="img/sheep.png" alt="" style="height:54px"><b style="color:#D2302C;font-size:18px">2027 정미년, 붉은 양의 해</b><span style="font-size:12px;color:#8A95A8">음력 설날(2월 7일)부터</span></div>` : ''}<div style="flex:1;display:grid;grid-template-columns:repeat(${cols},1fr);gap:${per === 12 ? 10 : 16}px;align-content:start">${months.map(m => {
+      p.insertAdjacentHTML('beforeend', `${per === 12 ? `<div style="display:flex;align-items:center;gap:12px;background:#FFE9E4;border-radius:14px;padding:6px 14px"><img src="img/sheep.png" alt="" style="height:54px"><b style="color:#D2302C;font-size:18px">2027 정미년, 붉은 양의 해</b><span style="font-size:12px;color:#8A95A8">음력 설날(2월 7일)부터</span></div>` : ''}<div style="flex:1;display:grid;grid-template-columns:repeat(${cols},1fr);gap:${per === 12 ? 10 : per === 6 ? 10 : 16}px;align-content:start">${months.map(m => {
         const c = monthCells(m);
-        return `<div style="border:2px solid var(--soft);border-radius:16px;padding:${per === 12 ? 6 : 10}px;display:flex;flex-direction:column;gap:4px;background:#fff">${dh ? `<div style="height:${dh}px;border:1.5px dashed #CDD5E1;border-radius:12px"></div>` : ''}<div style="display:flex;align-items:baseline;gap:6px"><b style="font-size:${per === 12 ? 20 : 28}px;color:var(--c);line-height:1">${m}</b><span style="font-size:${fs}px">월</span>${per === 4 || per === 2 ? `<span style="margin-left:auto;font-size:12px;color:#8A95A8">목표 ______________</span>` : ''}</div>
-          <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:${fs}px"><tr>${DOW.map((d, k) => `<th style="color:${k === 0 ? '#C9305A' : k === 6 ? '#2366C2' : '#56627A'};font-weight:700;padding:1px">${d}</th>`).join('')}</tr>${Array.from({ length: c.length / 7 }, (_, r) => `<tr>${c.slice(r * 7, r * 7 + 7).map((d, k) => { const hn = d && HOLI2027[m + '-' + d]; return `<td style="height:${rh}px;vertical-align:top;text-align:${per === 12 ? 'center' : 'left'};padding:1px 3px;border-top:1px solid #E4E9F1;color:${hn || k === 0 ? '#C9305A' : k === 6 ? '#2366C2' : '#1F2B45'};font-weight:${hn ? 700 : 400}">${d || ''}${hn && per !== 12 ? `<div style="font-size:9px;line-height:1.1">${hn}</div>` : ''}</td>`; }).join('')}</tr>`).join('')}</table></div>`;
+        return `<div style="border:2px solid var(--soft);border-radius:16px;padding:${per === 12 ? 6 : 10}px;display:flex;flex-direction:column;gap:4px;background:#fff">${dh ? `<div style="height:${dh}px;border:1.5px dashed #CDD5E1;border-radius:12px"></div>` : ''}<div style="display:flex;align-items:baseline;gap:6px"><b style="font-size:${per === 12 ? 20 : 28}px;color:var(--c);line-height:1">${m}</b><span style="font-size:${fs}px">월</span>${per === 4 || per === 2 || per === 6 ? `<span style="margin-left:auto;font-size:12px;color:#8A95A8">목표 ______________</span>` : ''}</div>
+          <table style="width:100%;border-collapse:collapse;table-layout:fixed;font-size:${fs}px"><tr>${DOW.map((d, k) => `<th style="color:${k === 0 ? '#C9305A' : k === 6 ? '#2366C2' : '#56627A'};font-weight:700;padding:1px">${d}</th>`).join('')}</tr>${Array.from({ length: c.length / 7 }, (_, r) => `<tr>${c.slice(r * 7, r * 7 + 7).map((d, k) => { const hn = d && HOLI2027[m + '-' + d]; return `<td style="height:${rh}px;vertical-align:top;text-align:${per === 12 ? 'center' : 'left'};padding:1px 3px;border-top:1px solid #E4E9F1;color:${hn || k === 0 ? '#C9305A' : k === 6 ? '#2366C2' : '#1F2B45'};font-weight:${hn ? 700 : 400}">${d || ''}${hn && per <= 4 ? `<div style="font-size:9px;line-height:1.1">${hn}</div>` : ''}</td>`; }).join('')}</tr>`).join('')}</table></div>`;
       }).join('')}</div><div style="font-size:10px;color:#8A95A8">공휴일: 한국천문연구원 2027년 달력자료(공식 발표 전) 기준</div>`);
       pages.push(p);
     }
     return pages;
   }
-  T.calendar.pages = a => calSheets(a, Store.d('cal:per', 4) === 1 ? 4 : Store.d('cal:per', 4));
+  T.calendar.pages = a => calSheets(a, Store.d('cal:per', 6) === 1 ? 6 : Store.d('cal:per', 6));
 
   /* ─── 협동 컬러링 ─── */
   function mandala(seed) {
@@ -807,7 +807,10 @@
     ctx.opts.append(field('조각 수', seg([['2x2', '4조각'], ['3x3', '9조각'], ['4x4', '16조각'], ['4x6', '24조각'], ['5x6', '30조각']], '3x3', v => { [cols, rows] = v.split('x').map(Number); draw(); })));
     const nb = el('<button class="btn">다른 눈꽃 무늬</button>'); nb.onclick = () => { seed = rint(1, 9999); Store.set('mseed', seed); upl = null; draw(); };
     const fi = el('<input type="file" accept="image/*">'); fi.onchange = () => { const f = fi.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { upl = r.result; draw(); }; r.readAsDataURL(f); };
-    ctx.opts.append(nb, field('내 그림(선 그림) 넣기', fi), el('<p class="hint">인쇄하면 조각마다 A4 한 장씩 크게 나오고, 붙일 자리 지도가 함께 있어요.</p>'));
+    const scenes = [['img/scene/scene1.jpg', '눈사람 마을'], ['img/scene/scene2.jpg', '썰매 언덕'], ['img/scene/scene3.jpg', '겨울 숲 동물'], ['img/scene/scene4.jpg', '스케이트 호수'], ['img/scene/scene5.jpg', '설날 한옥 마당'], ['', '눈꽃 무늬']];
+    upl = Store.d('scene', 'img/scene/scene1.jpg') || null;
+    ctx.opts.prepend(field('겨울 풍경 고르기', seg(scenes, upl || '', v => { upl = v || null; Store.set('scene', v); draw(); })));
+    ctx.opts.append(nb, field('내 그림(선 그림) 넣기', fi), el('<p class="hint">인쇄하면 조각마다 A4 한 장씩 크게 나오고, 붙일 자리 지도가 함께 있어요. 겨울 풍경은 Canva로 만든 선 그림이에요.</p>'));
     ctx.print(() => {
       const w = 1000 / cols, h = 1000 / rows, pages = [];
       for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {

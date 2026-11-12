@@ -81,6 +81,14 @@
     79: { q: '보드게임에서 지켜야 할 약속은?', think: ['차례', '규칙', '정리'], goal: '보드게임을 하며 규칙과 협동을 배워요.', tips: ['규칙을 먼저 함께 읽어요.', '이기고 져도 웃으며 인사해요.', '끝나면 제자리에 정리해요.'], ex: '게임 끝! "재미있었어, 고마워" 하고 인사', share: '오늘 가장 재미있던 게임은?' },
     80: { q: '친구의 숨은 재능을 본 적 있나요?', think: ['노래', '춤', '마술'], goal: '장기자랑으로 서로의 재능을 응원해요.', tips: ['무대에 선 친구에게 집중해요.', '끝나면 큰 박수를 보내요.', '실수해도 응원해요.'], ex: '응원 구호: "멋지다! 최고다!"', share: '가장 멋졌던 무대와 까닭은?' }
   };
+  D[63].extra = [
+    { t: 'list', title: '달력 표지에 무엇을 넣을까요?', points: ['· 2027 큰 숫자', '· 올해의 띠, 붉은 양', '· 새해 소망 한 줄', '· 겨울 풍경 (눈, 해돋이)', '· 나와 우리 가족'], img: 'img/sheep.png', free: 1 },
+    { t: 'gallery3', title: '이런 표지는 어때요?', items: [['img/sheep.png', '붉은 양과 해돋이', '양이 산 위로 떠오르는 해를 바라봐요'], ['img/photo/snowman.jpg', '눈사람 가족', '우리 가족을 눈사람으로 그려요'], ['img/cat6.png', '신나는 겨울 놀이', '내가 좋아하는 겨울 놀이를 크게!']] }
+  ];
+  D[54].extra = [
+    { t: 'video', title: '영상으로 알아봐요: 겨울방학 안전', look: ['영상에서 기억나는 안전 약속은?', '방학에 가장 조심할 곳은 어디일까요?'], v: { id: 'X_PZmYxuUIg', src: '행정안전부 안전한TV', name: '겨울방학 시작! 안전통신문' }, len: '약 6분' },
+    { t: 'list', title: '우리 반 방학 약속을 정해요', points: ['· 생활 약속 한 가지', '· 안전 약속 한 가지', '· 가족과 함께 할 약속 한 가지'], img: 'img/cat6.png', free: 1, note: '모둠에서 의견을 모아 발표하고, 칠판에 적은 약속을 안내문 빈칸에 함께 써요.' }
+  ];
   window.LESSON_DATA = D;
 
   const WORKSHEET = new Set(['sheet', 'rolling', 'cert', 'calendar', 'coloring', 'treasure']);
@@ -90,16 +98,26 @@
     const c = catOf(a), cat = `img/cat${c.id}.png`;
     const isWork = WORKSHEET.has(a.tool) || !!a.sheet;
     const workName = isWork ? '활동지 쓰기' : '함께 활동하기';
+    const BG = { 1: 'img/bg/bg3.jpg', 2: 'img/bg/bg1.jpg', 3: 'img/bg/bg6.jpg', 4: 'img/bg/bg5.jpg', 5: 'img/bg/bg3.jpg', 6: 'img/bg/bg2.jpg', 7: 'img/bg/bg1.jpg', 8: 'img/bg/bg3.jpg', 9: 'img/bg/bg4.jpg' }[c.id];
+    const ALT = { 1: 'slides/clean/step13.jpg', 2: 'img/quiz/mailbox.jpg', 3: 'img/cat3.png', 4: 'img/photo/penguin.jpg', 5: 'img/cat5.png', 6: 'img/photo/snowman.jpg', 7: 'img/cat7.png', 8: 'slides/clean/step01.jpg', 9: 'img/cat9.png' }[c.id];
+    const sheetPage = () => { const T = window.TOOLS; if (a.sheet) return buildSheet(a, a.sheet); if (T[a.tool] && T[a.tool].pages) { const ps = T[a.tool].pages(a); return ps && ps[0]; } return null; };
+    const hasSheet = isWork || (window.TOOLS[a.tool] && window.TOOLS[a.tool].pages);
     const slides = [
-      { t: 'cover', title: a.name, sub: a.d, img: cat, free: 1 },
-      { t: 'list', title: d.q, points: d.think.map(x => '· ' + x), img: 'img/kids.png', free: 1, note: '두세 명의 이야기를 들어요.' },
-      { t: 'goal', title: '오늘의 공부', text: d.goal, flow: [['설명 듣기', '10분'], [workName, '30분'], ['나누기', '마지막 5분']] },
+      { t: 'cover', title: a.name, sub: a.d, img: cat, free: 1, bg: BG },
+      { t: 'list', title: d.q, points: d.think.map(x => '· ' + x), img: ALT, free: ALT.endsWith('.png') ? 1 : 0, note: '짝과 30초 동안 이야기한 뒤 발표해요.' },
+      { t: 'goal', title: '오늘의 공부', text: d.goal },
       { t: 'steps', title: '이렇게 하면 잘할 수 있어요', points: d.tips, warn: '', img: cat },
-      { t: 'example', title: '예시를 볼까요?', text: d.ex, img: cat },
-      { t: 'steps', title: '활동 순서', points: a.steps, warn: '', img: cat },
+      ...(d.extra || []),
+      ...(hasSheet ? [
+        { t: 'sheetex', title: '활동지를 미리 볼까요?', steps: a.steps, page: sheetPage },
+        { t: 'sheetex', title: '완성 예시를 볼까요?', text: d.ex, page: () => { const p = sheetPage(); return p ? examplePage(a, p) : null; } }
+      ] : [
+        { t: 'example', title: '예시를 볼까요?', text: d.ex, img: cat },
+        { t: 'steps', title: '활동 순서', points: a.steps, warn: '', img: ALT }
+      ]),
       { t: 'work', title: isWork ? '활동지 시간' : '활동 시간', min: 30, parts: a.steps.map((s, i) => [`${i + 1}`, s, '']), tool: !isWork },
       { t: 'share', title: '함께 나눠요', text: d.share, img: 'img/kids.png' },
-      { t: 'cover', title: '오늘도 멋졌어요!', sub: '서로에게 박수를 보내요.', img: cat, free: 1, end: 1 }
+      { t: 'cover', title: '오늘도 멋졌어요!', sub: '서로에게 박수를 보내요.', img: cat, free: 1, end: 1, bg: BG }
     ];
     return { title: a.name, bg: c.tint, ink: c.ink, plan: '설명 10분 + 활동 30분', slides, auto: 1, pages: isWork && a.sheet ? (x => [buildSheet(x, x.sheet)]) : null };
   }

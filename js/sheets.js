@@ -13,7 +13,7 @@
   window.pageFrame = function (a, title, guide, opt) {
     opt = opt || {};
     const c = catOf(a);
-    const p = el(`<div class="page" data-act="${a.n}" style="${catVars(c)}"><div class="ph"><div class="pnum">${esc(c.name)} · 활동 ${a.n}</div><div class="pt">${ed(esc(title || a.name))}</div><img class="psticker" src="img/cat${c.id}.png" alt=""></div>${opt.noName ? '' : `<div class="pmeta">${nameLine()}</div>`}${guide ? `<p class="pg">${ed(esc(guide))}</p>` : ''}</div>`);
+    const p = el(`<div class="page" data-act="${a.n}" style="${catVars(c)}"><div class="ph"><div class="pnum">${esc(c.name)} · 활동 ${a.no}</div><div class="pt">${ed(esc(title || a.name))}</div><img class="psticker" src="img/cat${c.id}.png" alt=""></div>${opt.noName ? '' : `<div class="pmeta">${nameLine()}</div>`}${guide ? `<p class="pg">${ed(esc(guide))}</p>` : ''}</div>`);
     return p;
   };
 
@@ -137,6 +137,7 @@
       <div style="position:absolute;left:14px;bottom:12px;font-size:12px;color:#8A95A8;writing-mode:vertical-rl">가운데 굵은 선만 가위로 자르고, 점선을 따라 접어요.</div>`
   };
 
+  window.SHEET_BLOCKS = B;
   function render(b) { return (B[b.t] || (() => ''))(b); }
   window.renderBlock = render;
 
@@ -150,7 +151,7 @@
 
   /* 남는 공간만큼 칸 늘리기 */
   window.fillPage = function (p) {
-    if (p.dataset.filled || p.querySelector('[style*="rotate(90deg)"]')) return;
+    if (p.dataset.filled || p.querySelector('[data-nofill], [style*="rotate(90deg)"]')) return;
     const pr = p.getBoundingClientRect(); if (!pr.height) return;
     const sc = pr.height / 1123; let maxB = pr.top;
     Array.from(p.children).forEach(c => { maxB = Math.max(maxB, c.getBoundingClientRect().bottom); });

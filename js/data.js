@@ -493,5 +493,7 @@ window.TOOL_KIND = {
   sheet: '인쇄 활동지', rolling: '인쇄 활동지', cert: '상장 인쇄', calendar: '인쇄 활동지', coloring: '인쇄 활동지', treasure: '인쇄 + 놀이',
   quiz: '화면 게임', act: '화면 게임', escape: '화면 게임', zoom: '화면 게임', bingo: '빙고', vote: '화면 투표', ceremony: '화면 행사',
   events: '교실 도구', angel: '교실 도구', roles: '교실 도구', lineup: '교실 도구', stations: '교실 도구', draw: '교실 도구', slideshow: '화면 행사',
-  wall: '함께 채우기', guide: '진행 안내', sheep: '인쇄 활동지'
+  wall: '함께 채우기', guide: '진행 안내', sheep: '인쇄 활동지', praise: '인쇄 활동지'
 };
+/* 화면에 보이는 번호: 분류 순서대로 1, 2, 3… (내부 번호 n은 그대로) */
+window.ACTS.sort((x, y) => x.c - y.c || x.n - y.n).forEach((a, i) => { a.no = i + 1; });

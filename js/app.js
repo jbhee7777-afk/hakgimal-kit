@@ -19,7 +19,7 @@
 
   function row(a) {
     const c = catOf(a), on = Store.inPack(a.n);
-    const r = el(`<div class="row" style="${catVars(c)}" role="button" tabindex="0"><span class="num">${a.n}</span><div class="txt"><div class="nm">${esc(a.name)}${a.star ? ICON.star : ''}</div><div class="ds">${esc(a.d)}</div></div><span class="kd">${TOOL_KIND[a.tool]}</span><button class="pick ${on ? 'on' : ''}" aria-label="${on ? '꾸러미에서 빼기' : '꾸러미에 담기'}" title="${on ? '꾸러미에서 빼기' : '꾸러미에 담기'}">${ICON.check}</button></div>`);
+    const r = el(`<div class="row" style="${catVars(c)}" role="button" tabindex="0"><span class="num">${a.no}</span><div class="txt"><div class="nm">${esc(a.name)}${a.star ? ICON.star : ''}</div><div class="ds">${esc(a.d)}</div></div><span class="kd">${TOOL_KIND[a.tool]}</span><button class="pick ${on ? 'on' : ''}" aria-label="${on ? '꾸러미에서 빼기' : '꾸러미에 담기'}" title="${on ? '꾸러미에서 빼기' : '꾸러미에 담기'}">${ICON.check}</button></div>`);
     r.onclick = () => location.hash = '#/a/' + a.n;
     r.onkeydown = e => { if (e.key === 'Enter') location.hash = '#/a/' + a.n; };
     const p = $('.pick', r);
@@ -95,7 +95,7 @@
     const L = el('<div class="packlist"></div>');
     pk.forEach((n, i) => {
       const a = actBy(n), c = catOf(a);
-      const r = el(`<div class="packrow" style="${catVars(c)}"><span class="ord">${i + 1}</span><span class="cat">${esc(c.name)}</span><span class="nm">${a.n}. ${esc(a.name)}</span><span class="kd hint">${TOOL_KIND[a.tool]}</span><button class="iconbtn" aria-label="위로">${ICON.up}</button><button class="iconbtn" aria-label="아래로">${ICON.down}</button><button class="iconbtn" aria-label="빼기">${ICON.x}</button></div>`);
+      const r = el(`<div class="packrow" style="${catVars(c)}"><span class="ord">${i + 1}</span><span class="cat">${esc(c.name)}</span><span class="nm">${a.no}. ${esc(a.name)}</span><span class="kd hint">${TOOL_KIND[a.tool]}</span><button class="iconbtn" aria-label="위로">${ICON.up}</button><button class="iconbtn" aria-label="아래로">${ICON.down}</button><button class="iconbtn" aria-label="빼기">${ICON.x}</button></div>`);
       const [u, d, x] = $$('button', r);
       $('.nm', r).onclick = () => location.hash = `#/a/${n}?pack`;
       u.onclick = () => { if (i) { [pk[i - 1], pk[i]] = [pk[i], pk[i - 1]]; Store.save(); renderPack(); } };
@@ -116,7 +116,7 @@
     const suf = fromPack ? '?pack' : '';
     app.innerHTML = '';
     app.style.cssText = catVars(c);
-    const bar = el(`<header class="abar" style="${catVars(c)}"><a class="btn flat" href="${fromPack ? '#/pack' : '#/'}">${ICON.back} ${fromPack ? '꾸러미' : '목록'}</a><img src="img/cat${c.id}.png" alt="" style="height:50px"><span class="anum">${a.n}</span><div><h1>${esc(a.name)}${a.star ? ICON.star : ''}</h1><div class="acat">${esc(c.name)} · ${esc(a.d)}</div></div><span class="sp"></span>
+    const bar = el(`<header class="abar" style="${catVars(c)}"><a class="btn flat" href="${fromPack ? '#/pack' : '#/'}">${ICON.back} ${fromPack ? '꾸러미' : '목록'}</a><img src="img/cat${c.id}.png" alt="" style="height:50px"><span class="anum">${a.no}</span><div><h1>${esc(a.name)}${a.star ? ICON.star : ''}</h1><div class="acat">${esc(c.name)} · ${esc(a.d)}</div></div><span class="sp"></span>
       <button class="btn pickwide ${Store.inPack(n) ? 'on' : ''}" data-pk>${ICON.check}<span>${Store.inPack(n) ? '꾸러미에 있어요' : '꾸러미에 담기'}</span></button>
       <button class="btn dark" data-pr hidden>${ICON.print} 인쇄</button>
       <button class="iconbtn" data-fs aria-label="크게 보기" title="크게 보기">${ICON.full}</button>
@@ -140,6 +140,7 @@
     };
     const runL = () => {
       runLesson(a, stage, ctx);
+      if (L.topicsUI) L.topicsUI(ctx, () => { clearTimers(); stage.innerHTML = ''; runLesson(a, stage, ctx); });
       window.__toTool = () => set('tool');
       const showOnly = (pages, label) => { stage.innerHTML = ''; const sb = el('<div class="stagebody"></div>'); const back = el(`<div style="display:flex;gap:10px;padding:10px 16px;background:var(--paper);border-bottom:1.5px solid var(--rule);align-items:center"><b style="font-size:18px">${label}</b><span style="flex:1"></span><button class="btn dark">수업 슬라이드로 돌아가기</button></div>`); $('button', back).onclick = () => { stage.innerHTML = ''; runLesson(a, stage, ctx); }; stage.append(back, sb); showPaper(sb, pages); };
       const workPages = L.pages ? () => L.pages(a) : (TOOLS[a.tool].pages ? () => TOOLS[a.tool].pages(a) : null);
@@ -154,7 +155,8 @@
         ctx.print(() => printPages(workPages()));
         const b1 = el('<button class="btn dark">활동지 인쇄 (아이들용)</button>'); b1.onclick = () => printPages(workPages());
         const b3 = el('<button class="btn flat">활동지 미리 보기</button>'); b3.onclick = () => showOnly(workPages(), '아이들 활동지');
-        ctx.opts.append(b1, b3);
+        const b4 = el('<button class="btn">완성 예시 보기</button>'); b4.onclick = () => { const ps = workPages(); if (ps && ps[0]) showOnly([examplePage(a, ps[0])], '완성 예시'); };
+        ctx.opts.append(b1, b4, b3);
       } else if (a.tool !== 'sheet') {
         const bt = el(`<button class="btn">${esc(TOOL_KIND[a.tool])} 화면 열기</button>`); bt.onclick = () => set('tool'); ctx.opts.append(bt);
       }
@@ -163,7 +165,7 @@
     };
     let set = () => {};
     if (L) {
-      const ms = el(`<div class="modeseg"><button data-m="lesson">수업 슬라이드<small>${esc(L.plan)}</small></button><button data-m="tool">${esc(TOOL_KIND[a.tool])}<small>${a.tool === 'roles' ? '청소 구역 뽑기와 완료 체크' : '활동 도구'}</small></button></div>`);
+      const ms = el(`<div class="modeseg"><button data-m="lesson">수업 슬라이드<small>전자칠판에서 넘기며 수업해요</small></button><button data-m="tool">${esc(TOOL_KIND[a.tool])}<small>${a.tool === 'roles' ? '청소 구역 뽑기와 완료 체크' : '활동 도구'}</small></button></div>`);
       $('.aside', v).insertBefore(ms, $('.opts', v));
       set = m => { mode = m; Store.set('mode:' + n, m); $$('button', ms).forEach(b => b.classList.toggle('on', b.dataset.m === m)); clearTimers(); stage.innerHTML = ''; ctx.opts.innerHTML = ''; pr.hidden = true; m === 'lesson' ? runL() : runTool(); };
       $$('button', ms).forEach(b => b.onclick = () => set(b.dataset.m));
