@@ -21,10 +21,19 @@
 
   /* ── 포스트잇 쪽지 (한 장에 4명) ── */
   B.postits = b => `<div data-nofill class="notes4">${(b.notes || [{}, {}, {}, {}]).map((x, i) => `<div class="note" style="background:${NOTE_COL[i % 4]}"><i class="tape"></i><div class="nt">${esc(b.title)}</div><div class="nto">To. <b>${esc(x.to || '')}</b><i></i></div><div class="nlines">${L(b.lines || 5)}</div><div class="nfrom">From. <b>${esc(x.from || '')}</b>${x.from ? '' : '<i></i>'}</div></div>`).join('')}</div>`;
+  /* 한 사람이 한 장: 내가 네 친구에게 쓰고, 나도 네 친구에게서 받아요 */
+  window.pairMulti = function (key, reset) {
+    const names = Store.roster(); if (names.length < 2) return null;
+    let order = reset ? null : Store.d('ring:' + key, null);
+    if (!order || order.length !== names.length || names.some(n => !order.includes(n))) { order = shuffle(names); Store.set('ring:' + key, order); }
+    const k = Math.min(4, names.length - 1), m = {};
+    order.forEach((w, i) => { m[w] = Array.from({ length: k }, (_, j) => order[(i + j + 1) % order.length]); });
+    return m;
+  };
   function notePages(a, title, key, hint, lines) {
-    const m = pairMap(key), names = Store.roster(), out = [];
-    if (m) { for (let k = 0; k < names.length; k += 4) { const p = pageFrame(a, a.name, hint, { noName: true }); p.insertAdjacentHTML('beforeend', B.postits({ title, lines, notes: names.slice(k, k + 4).map(w => ({ to: m[w], from: w })) })); out.push(p); } }
-    else for (let k = 0; k < 6; k++) { const p = pageFrame(a, a.name, hint, { noName: true }); p.insertAdjacentHTML('beforeend', B.postits({ title, lines })); out.push(p); }
+    const m = pairMulti(key), names = Store.roster(), out = [];
+    if (m) names.forEach(w => { const p = pageFrame(a, a.name, hint, { noName: true }); p.insertAdjacentHTML('beforeend', B.postits({ title, lines, notes: [0, 1, 2, 3].map(j => ({ to: m[w][j] || '', from: w })) })); out.push(p); });
+    else for (let k = 0; k < 24; k++) { const p = pageFrame(a, a.name, hint, { noName: true }); p.insertAdjacentHTML('beforeend', B.postits({ title, lines })); out.push(p); }
     return out;
   }
   window.notePages = notePages;
@@ -41,13 +50,21 @@
       <div class="dmean"><b>뜻</b> 이 말은 이럴 때 써요.${L(2)}</div><div class="dex"><b>예문</b><div class="bubble">${L(1)}</div></div>
       <div class="drow"><div><b>비슷한 말</b> <i></i></div><div class="dpic">그림</div></div><div class="dby">쓴 사람 <i></i></div></div>`).join('')}</div>`;
 
+  /* ── 좋은 말 사전 한 쪽 (한 사람이 한 장, 세 칸만 써요) ── */
+  B.dict3 = () => `<div data-nofill class="d3">
+    <div class="d3-top"><div class="d3-tab"><span>첫 글자</span><i></i></div><div class="d3-word"><span>내가 고른 따뜻한 말</span><i class="d3w"></i></div></div>
+    <div class="d3-q"><b>1</b><div><div class="d3-l">언제 하면 좋은 말일까요?</div><i class="d3-line"></i></div></div>
+    <div class="d3-q"><b>2</b><div><div class="d3-l">이 말을 넣어 친구에게 말해 봐요.</div><div class="d3-bub"><i class="d3-line"></i></div></div></div>
+    <div class="d3-q d3-grow"><b>3</b><div><div class="d3-l">이 말을 하는 장면을 그려요.</div><div class="d3-pic"></div></div></div>
+    <div class="d3-foot">우리 반 좋은 말 사전 · 다 쓰면 선생님이 첫 글자 ㄱㄴㄷ 순서로 묶어요</div></div>`;
+
   /* ── 진짜 엽서 같은 인사 카드 ── */
   B.postcard = () => `<div data-nofill class="pcard"><div class="pc-top"><div class="pc-to">To. <i></i></div><div class="pc-stamp"><span>우표를 그려요</span></div><svg class="pc-post" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="#C9305A" stroke-width="3" opacity=".55"/><circle cx="60" cy="60" r="40" fill="none" stroke="#C9305A" stroke-width="1.5" opacity=".55"/><text x="60" y="56" text-anchor="middle" font-family="Miso" font-weight="700" font-size="15" fill="#C9305A" opacity=".7">2026. 12.</text><text x="60" y="76" text-anchor="middle" font-family="Miso" font-weight="700" font-size="14" fill="#C9305A" opacity=".7">우리 반 우체국</text></svg></div>
     <div class="pc-body"><div class="pc-lines">${L(9)}</div><div class="pc-side"><div class="polaroid"><div></div><span>함께한 장면</span></div><img src="img/cat2.png" alt=""></div></div>
     <div class="pc-bottom"><span>${HEART('#FF9DB5')}${HEART('#FFC23D')}${HEART('#9BD7B5')}</span><div class="pc-from">From. <i></i></div></div></div>`;
 
   /* ── 추억 포토카드 한 장 ── */
-  B.photocard1 = () => `<div data-nofill class="pc1"><div class="pc1-hint">가운데 점선을 접으면 앞뒤가 있는 카드가 돼요. 바깥 굵은 선을 따라 오려요.</div><div class="pc1-card"><div class="pc1-front"><div class="pc1-photo"><span>내 얼굴을 그리거나 사진을 붙여요</span></div><div class="pc1-name"><i></i></div><div class="pc1-tag">2026 추억 카드</div></div><div class="pc1-back">${[['별명', 'star'], ['좋아하는 것', 'heart'], ['올해 최고의 순간', 'star'], ['내 꿈', 'heart'], ['친구들에게 한마디', 'star']].map(([t, ic]) => `<div class="pc1-row">${ic === 'star' ? STAR('', '#FFE48A').replace('58px;height:58px', '26px;height:26px') : HEART()}<b>${t}</b><i></i></div>`).join('')}</div></div></div>`;
+  B.photocard1 = () => `<div data-nofill class="pc1"><div class="pc1-hint">가운데 점선을 접으면 앞뒤가 있는 카드가 돼요. 바깥 굵은 선을 따라 오려요.</div><div class="pc1-card"><div class="pc1-front"><div class="pc1-photo"><span>내 얼굴을 그리거나 사진을 붙여요</span></div><div class="pc1-name"><i></i></div><div class="pc1-word"><span>나를 한 단어로!</span><i></i></div><div class="pc1-tag">2026 추억 카드</div></div><div class="pc1-back">${[['별명', 'star'], ['좋아하는 것', 'heart'], ['올해 최고의 순간', 'star'], ['내 꿈', 'heart'], ['친구들에게 한마디', 'star']].map(([t, ic]) => `<div class="pc1-row">${ic === 'star' ? STAR('', '#FFE48A').replace('58px;height:58px', '26px;height:26px') : HEART()}<b>${t}</b><i></i></div>`).join('')}</div></div></div>`;
 
   /* ── 새해 목표: 산 오르기 ── */
   B.goals = () => `<div data-nofill class="goalwrap"><svg viewBox="0 0 700 330" class="goalmt"><path d="M0 330 L250 60 L330 140 L470 20 L700 330 Z" fill="#E7F3EC"/><path d="M250 60 L285 98 L262 92 L240 104 L222 90Z M470 20 L505 66 L480 58 L458 72 L440 56Z" fill="#fff"/><path d="M80 320 C 200 300, 180 230, 300 220 S 380 150, 470 70" fill="none" stroke="#9AA6B8" stroke-width="4" stroke-dasharray="10 10"/>${[[150, 290, 1], [330, 205, 2], [468, 60, 3]].map(([x, y, n]) => `<line x1="${x}" y1="${y}" x2="${x}" y2="${y - 70}" stroke="#56627A" stroke-width="4"/><path d="M${x} ${y - 70} l46 14 -46 14z" fill="${['#FF9DB5', '#FFC23D', '#7CC6F2'][n - 1]}"/><text x="${x + 14}" y="${y - 52}" font-family="Miso" font-weight="700" font-size="16" fill="#1F2B45">${n}</text>`).join('')}<text x="560" y="300" font-family="Miso" font-size="15" fill="#56627A">한 걸음씩 올라가요!</text></svg>
@@ -92,11 +109,33 @@
     c => `<path d="M30 200 H110 L80 260 L110 320 H30 Z M670 200 H590 L620 260 L590 320 H670 Z" fill="${c}" stroke="#1F2B45" stroke-width="7" opacity=".7"/><rect x="90" y="150" width="520" height="220" rx="24" fill="${c}" stroke="#1F2B45" stroke-width="8"/>`,
     c => `<path d="M350 40 L420 190 L590 205 L465 320 L500 490 L350 405 L200 490 L235 320 L110 205 L280 190Z" fill="${c}" stroke="#1F2B45" stroke-width="8" stroke-linejoin="round"/>`
   ];
+  const scallop = (cx, cy, r, n) => { let d = ''; for (let k = 0; k < n; k++) { const a1 = k / n * Math.PI * 2, a2 = (k + 1) / n * Math.PI * 2, am = (a1 + a2) / 2; const p = (a, rr) => `${(cx + Math.cos(a) * rr).toFixed(1)} ${(cy + Math.sin(a) * rr).toFixed(1)}`; d += (k ? ' ' : 'M' + p(a1, r)) + ` Q${p(am, r * 1.16)} ${p(a2, r)}`; } return d + 'Z'; };
+  SIGN_SHAPES.push(
+    /* 6 리본 배지 */
+    c => `<path d="M250 380 L190 570 L250 530 L290 590 L330 420Z M450 380 L510 570 L450 530 L410 590 L370 420Z" fill="#fff" stroke="#1F2B45" stroke-width="7" stroke-linejoin="round"/><path d="${scallop(350, 250, 215, 18)}" fill="${c}" stroke="#1F2B45" stroke-width="8"/><circle cx="350" cy="250" r="168" fill="#fff" stroke="#1F2B45" stroke-width="4" stroke-dasharray="10 10"/>`,
+    /* 7 화살표 표지판 */
+    c => `<rect x="335" y="360" width="30" height="220" rx="8" fill="#fff" stroke="#1F2B45" stroke-width="7"/><path d="M40 160 H520 L660 260 L520 360 H40 Q20 360 20 340 V180 Q20 160 40 160Z" fill="${c}" stroke="#1F2B45" stroke-width="8" stroke-linejoin="round"/><circle cx="70" cy="260" r="12" fill="#fff" stroke="#1F2B45" stroke-width="5"/>`,
+    /* 8 구름 말풍선 */
+    c => `<path d="M170 400 Q70 400 70 320 Q30 260 90 210 Q90 120 190 120 Q240 50 330 80 Q420 30 490 90 Q600 80 610 180 Q680 230 640 300 Q650 400 540 400 H300 L200 520 L220 400Z" fill="${c}" stroke="#1F2B45" stroke-width="8" stroke-linejoin="round"/>`,
+    /* 9 깃발 줄 + 현수막 */
+    c => `<path d="M20 60 Q350 140 680 60" fill="none" stroke="#1F2B45" stroke-width="5"/>${[0, 1, 2, 3, 4, 5, 6].map(k => { const x = 50 + k * 90, y = 60 + Math.sin(k / 6 * Math.PI) * 52; return `<path d="M${x} ${y} L${x + 70} ${y + 4} L${x + 35} ${y + 70}Z" fill="${k % 2 ? '#fff' : c}" stroke="#1F2B45" stroke-width="4" stroke-linejoin="round"/>`; }).join('')}<rect x="60" y="190" width="580" height="250" rx="30" fill="${c}" stroke="#1F2B45" stroke-width="8"/><rect x="84" y="214" width="532" height="202" rx="18" fill="none" stroke="#fff" stroke-width="5"/>`,
+    /* 10 입장권 */
+    c => `<path d="M60 130 H640 V230 A40 40 0 0 0 640 310 V410 H60 V310 A40 40 0 0 0 60 230Z" fill="${c}" stroke="#1F2B45" stroke-width="8" stroke-linejoin="round"/><line x1="160" y1="140" x2="160" y2="400" stroke="#1F2B45" stroke-width="4" stroke-dasharray="12 10"/><text x="110" y="280" text-anchor="middle" font-family="Miso" font-weight="700" font-size="30" fill="#1F2B45" transform="rotate(-90 110 270)">입 장 권</text>`,
+    /* 11 사진 틀 (얼굴을 넣어 찍어요) */
+    c => `<path d="M40 40 H660 V560 H40Z M150 120 V400 H550 V120Z" fill="${c}" fill-rule="evenodd" stroke="#1F2B45" stroke-width="8"/><rect x="150" y="120" width="400" height="280" fill="none" stroke="#1F2B45" stroke-width="4" stroke-dasharray="12 10"/><text x="350" y="270" text-anchor="middle" font-family="Miso" font-size="22" fill="#8A95A8">이 칸은 오려 내요</text>`,
+    /* 12 하트 두 개 */
+    c => `<path d="M230 470 C70 370 20 290 40 210 C60 130 160 110 220 170 C280 110 380 130 400 210 C420 290 370 370 230 470Z" fill="#fff" stroke="#1F2B45" stroke-width="7"/><path d="M450 540 C250 420 190 320 210 220 C230 120 360 90 450 170 C540 90 670 120 690 220 C710 320 650 420 450 540Z" fill="${c}" stroke="#1F2B45" stroke-width="8"/>`
+  );
+  const SIGN_TY = [250, 290, 250, 265, 310, 255, 265, 255, 320, 275, 480, 330];
+  const SIGN_X = [350, 350, 350, 350, 350, 350, 330, 350, 350, 400, 350, 455];
   window.signPages = function (a, texts) {
     const cols = ['#FFE48A', '#FFC9D6', '#CBEAFF', '#D2F0DC', '#E6DAFF'];
     return texts.map((s, i) => { const k = i % SIGN_SHAPES.length, p = el(`<div class="page" style="${catVars(catOf(a))};justify-content:center;align-items:center;padding:30px"></div>`);
-      const ty = [250, 300, 250, 265, 300][k], fs = s.length > 7 ? 64 : s.length > 4 ? 84 : 110;
-      p.innerHTML = `<svg viewBox="0 0 700 600" style="width:100%;height:auto">${SIGN_SHAPES[k](cols[i % cols.length])}<text x="350" y="${ty + fs / 3}" text-anchor="middle" font-family="Miso" font-weight="700" font-size="${fs}" fill="#1F2B45">${esc(s)}</text></svg><div style="font-size:16px;color:#8A95A8;margin-top:20px">굵은 선을 따라 오려 막대에 붙여요</div>`; return p; });
+      const W = [520, 380, 440, 480, 230, 250, 440, 480, 500, 430, 540, 270][k], H = [300, 240, 260, 190, 190, 220, 180, 260, 220, 240, 120, 210][k];
+      let lines = [s]; if (k !== 10 && s.length > 5 && s.includes(' ')) { const mid = s.length / 2; let best = -1; [...s].forEach((ch, j) => { if (ch === ' ' && (best < 0 || Math.abs(j - mid) < Math.abs(best - mid))) best = j; }); lines = [s.slice(0, best), s.slice(best + 1)]; }
+      const long = Math.max(...lines.map(x => x.replace(/[ !?.♥]/g, '').length + (x.match(/[ !?.♥]/g) || []).length * .45));
+      const fs = Math.round(Math.min(120, W / long, H / (lines.length * 1.15))), ty = SIGN_TY[k] - (lines.length - 1) * fs * .58;
+      p.innerHTML = `<svg viewBox="0 0 700 600" style="width:100%;height:auto">${SIGN_SHAPES[k](cols[i % cols.length])}<text text-anchor="middle" font-family="Miso" font-weight="700" font-size="${fs}" fill="#1F2B45">${lines.map((x, j) => `<tspan x="${SIGN_X[k]}" y="${ty + fs / 3 + j * fs * 1.16}">${esc(x)}</tspan>`).join('')}</text></svg><div style="font-size:16px;color:#8A95A8;margin-top:20px">굵은 선을 따라 오려 막대에 붙여요</div>`; return p; });
   };
 
   /* ── 겨울방학 안내문 (함께 채우는 안내문) ── */

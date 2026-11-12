@@ -6,6 +6,32 @@
   const WORDS = [['눈사람', '눈을 굴려 만든 하얀 사람'], ['붕어빵', '물고기 모양 겨울 간식'], ['목도리', '목을 따뜻하게 감싸요'], ['해돋이', '새해 아침 해가 떠오르는 것'], ['썰매장', '썰매를 타러 가는 곳'], ['크리스마스', '12월 25일'], ['겨울방학', '지금 우리가 기다리는 것'], ['세뱃돈', '설날 절하고 받는 돈'], ['고드름', '처마 끝 얼음 막대'], ['새해소망', '새해에 이루고 싶은 바람']];
   const FILL = Array.from('가나다라마바사아자차카타파하별달꽃빛물불숲산강들봄길');
 
+  /* ── 선생님 정답지 (미리 인쇄해 두기) ── */
+  const plain = h => { const d = document.createElement('div'); d.innerHTML = String(h).replace(/<br\s*\/?>/gi, ' / ').replace(/<\/(td|th)>/gi, ' ').replace(/<\/tr>/gi, ' / '); return d.textContent.replace(/\s+/g, ' ').replace(/( \/)+\s*$/, '').trim(); };
+  window.answerKeyPages = function (a, title, rows, note, per) {
+    per = per || 16; const out = [];
+    for (let k = 0; k < Math.max(1, rows.length); k += per) {
+      const p = pageFrame(a, title + ' · 선생님 정답지', note || '화면에 나오는 순서 그대로예요. 아이들에게 보이지 않게 보관해요.', { noName: true });
+      p.insertAdjacentHTML('beforeend', `<table data-nofill class="akey"><thead><tr><th style="width:56px">번호</th><th>문제</th><th style="width:30%">정답</th></tr></thead><tbody>${rows.slice(k, k + per).map((r, j) => `<tr><td class="n">${k + j + 1}</td><td>${esc(plain(r[0]))}</td><td class="a">${esc(plain(r[1]))}</td></tr>`).join('')}</tbody></table>`);
+      out.push(p);
+    }
+    return out;
+  };
+  window.plainText = plain;
+
+  /* 방마다 힌트 3단계: 누를 때마다 하나씩 더 */
+  function hintsOf(r) {
+    if (r.hints) return r.hints;
+    const ans = String(r.ans), h = [r.hint];
+    if (r.type === 'tiles') { h.push(`낱말은 ${Array.from(ans).length}글자예요. 첫 글자는 "${Array.from(ans)[0]}"!`); h.push(`앞의 두 글자는 "${Array.from(ans).slice(0, 2).join('')}"예요.`); }
+    else if (r.type === 'pick') { const wrong = shuffle(r.opts.filter(o => o !== r.ans)); h.push(`"${wrong[0]}"은(는) 정답이 아니에요.`); if (wrong[1]) h.push(`"${wrong[1]}"도 정답이 아니에요.`); }
+    else {
+      const n = +ans; h.push(ans.length > 1 ? `정답은 ${ans.length}자리 수예요. 맨 앞 숫자는 ${ans[0]}!` : `정답은 ${n % 2 ? '홀수' : '짝수'}예요.`);
+      h.push(ans.length > 1 ? `정답은 ${Math.floor(n / 10) * 10}과 ${Math.floor(n / 10) * 10 + 9} 사이예요.` : `정답은 ${Math.max(0, n - 1)}, ${n}, ${Math.min(9, n + 1)} 중 하나예요.`);
+    }
+    return h;
+  }
+
   /* 방 만들기 */
   function seqA() { const s = R(2, 9), a = R(3, 5), b = R(1, a - 1); const t = [s, s + a, s + a - b, s + 2 * a - b, s + 2 * a - 2 * b]; return { t: '규칙의 방', q: `수가 어떤 규칙으로 바뀌는지 찾아요.<br><b class="eq">${t.join(', ')}, ?</b>`, ans: String(s + 3 * a - 2 * b), hint: '커졌다 작아졌다 해요. 두 번씩 묶어서 보세요.' }; }
   function timeA() { const h = R(1, 9), m1 = R(0, 4) * 5, d = R(4, (55 - m1) / 5) * 5; const m2 = m1 + d; const fmt = (hh, mm) => `${hh}시 ${mm}분`; return { t: '시계의 방', q: `수업이 <b>${fmt(h, m1)}</b>에 시작해서 <b>${fmt(h, m2)}</b>에 끝났어요. 몇 분 동안 했을까요?`, svg: [[h, m1], [h, m2]], ans: String(d), hint: '긴바늘이 숫자 한 칸 갈 때 5분이에요.' }; }
@@ -54,12 +80,12 @@
     let rooms, cur, timer, hints;
     function intro() {
       clearTimers(); rooms = makeRooms(band); cur = 0; hints = 0;
-      body.innerHTML = `<div class="center"><span class="lvl">${['', '1~2학년', '3~4학년', '5~6학년'][band]} · 방 ${rooms.length}개</span><div class="qbig">겨울방학 열쇠를 찾아라!</div><p class="expl">교실 문이 잠겼어요. 모둠이 함께 방의 문제를 풀어요. 앞 방의 답이 마지막 문에 다시 쓰이니 <b>푼 답을 종이에 꼭 적어 두세요.</b> 힌트를 쓰면 1분이 줄어요.</p><button class="btn huge dark" data-s>탈출 시작 (${mins}분)</button></div>`;
+      body.innerHTML = `<div class="center"><span class="lvl">${['', '1~2학년', '3~4학년', '5~6학년'][band]} · 방 ${rooms.length}개</span><div class="qbig">겨울방학 열쇠를 찾아라!</div><p class="expl">교실 문이 잠겼어요. 모둠이 함께 방의 문제를 풀어요. 앞 방의 답이 마지막 문에 다시 쓰이니 <b>푼 답을 종이에 꼭 적어 두세요.</b> 막히면 힌트를 눌러요. 누를 때마다 힌트가 하나씩 더 나와요(방마다 3개).</p><button class="btn huge dark" data-s>탈출 시작 (${mins}분)</button></div>`;
       $('[data-s]', body).onclick = () => { timer = makeTimer({ sec: mins * 60, onEnd: fail }); room(); timer.start(); };
     }
     function room() {
       const r = rooms[cur];
-      body.innerHTML = `<div class="center" style="gap:14px;overflow:auto;justify-content:flex-start;padding-top:18px"><div style="display:flex;gap:24px;align-items:center"><div class="rooms">${rooms.map((x, i) => `<div class="roomdot ${i < cur ? 'open' : i === cur ? 'now' : ''}">${i + 1}</div>`).join('')}</div><div data-t></div></div><span class="lvl">${cur + 1}번 방 · ${r.t}</span><div class="qbig esc-q" style="font-size:clamp(22px,2.4vw,34px)">${r.q}</div>${r.svg ? `<div style="display:flex;gap:20px">${r.svg.map(([h, m]) => clockSVG(h, m)).join('')}</div>` : ''}<div data-lock></div><div class="ctrl"><button class="btn big dark" data-o>열기</button><button class="btn big" data-h>힌트 (−1분)</button></div><div class="expl" data-msg></div></div>`;
+      body.innerHTML = `<div class="center" style="gap:14px;overflow:auto;justify-content:flex-start;padding-top:18px"><div style="display:flex;gap:24px;align-items:center"><div class="rooms">${rooms.map((x, i) => `<div class="roomdot ${i < cur ? 'open' : i === cur ? 'now' : ''}">${i + 1}</div>`).join('')}</div><div data-t></div></div><span class="lvl">${cur + 1}번 방 · ${r.t}</span><div class="qbig esc-q" style="font-size:clamp(22px,2.4vw,34px)">${r.q}</div>${r.svg ? `<div style="display:flex;gap:20px">${r.svg.map(([h, m]) => clockSVG(h, m)).join('')}</div>` : ''}<div data-lock></div><div class="ctrl"><button class="btn big dark" data-o>열기</button><button class="btn big" data-h>힌트 보기 (0/3)</button></div><div class="esc-hints" data-hl></div><div class="expl" data-msg></div></div>`;
       $('[data-t]', body).appendChild(timer.node);
       const lock = $('[data-lock]', body); let get;
       if (r.type === 'tiles') {
@@ -83,13 +109,17 @@
         if (get()) { beep('fan'); cur++; if (cur >= rooms.length) return win(); confetti(st); $('[data-msg]', body).textContent = `문이 열렸어요! 답 "${r.ans}"을(를) 종이에 적어 두세요.`; setTimeout(room, 1600); }
         else { beep('no'); $('[data-msg]', body).textContent = '아직 안 열려요. 모둠이 함께 다시 생각해 봐요.'; lock.animate([{ transform: 'translateX(-10px)' }, { transform: 'translateX(10px)' }, { transform: 'none' }], 300); }
       };
-      $('[data-h]', body).onclick = () => { $('[data-msg]', body).textContent = '힌트: ' + r.hint; hints++; const left = timer.left(); timer.stop(); const nt = makeTimer({ sec: Math.max(5, left - 60), onEnd: fail }); timer = nt; $('[data-t]', body).innerHTML = ''; $('[data-t]', body).appendChild(nt.node); nt.start(); };
+      const hs = hintsOf(r); r.hints = hs; let hn = 0;
+      $('[data-h]', body).onclick = e => { if (hn >= hs.length) return; const hl = $('[data-hl]', body); hl.insertAdjacentHTML('beforeend', `<p><b>힌트 ${hn + 1}</b>${esc(hs[hn])}</p>`); hn++; hints++; beep('pop'); e.currentTarget.textContent = hn >= hs.length ? '힌트를 다 봤어요' : `힌트 하나 더 (${hn}/${hs.length})`; e.currentTarget.disabled = hn >= hs.length; };
     }
     function win() { const left = timer.left(); timer.stop(); body.innerHTML = `<div class="center"><div class="qhuge" style="font-size:clamp(60px,9vw,130px)">탈출 성공!</div><p class="expl">남은 시간 ${Math.floor(left / 60)}분 ${left % 60}초, 힌트 ${hints}번 사용</p><button class="btn big dark" data-a>새 문제로 다시</button></div>`; confetti(st); setTimeout(() => confetti(st), 600); $('[data-a]', body).onclick = intro; }
     function fail() { body.innerHTML = `<div class="center"><div class="qbig">시간이 다 됐어요</div><p class="expl">${cur}개의 방을 열었어요. 새 문제로 다시 도전해 볼까요?</p><button class="btn big dark" data-a>새 문제로 다시</button></div>`; $('[data-a]', body).onclick = intro; }
     const segB = (items, cur, on) => { const s = el('<div class="seg"></div>'); items.forEach(([v, t]) => { const b = el(`<button class="${v === cur ? 'on' : ''}">${t}</button>`); b.onclick = () => { $$('button', s).forEach(x => x.classList.remove('on')); b.classList.add('on'); on(v); }; s.appendChild(b); }); return s; };
     const lab = (t, n) => { const l = el(`<label class="f">${t}</label>`); l.appendChild(n); return l; };
     ctx.opts.append(lab('난이도 (학년)', segB([[1, '1~2학년'], [2, '3~4학년'], [3, '5~6학년']], band, v => { band = v; Store.set('esc:band', v); mins = [0, 15, 20, 25][v]; intro(); })), lab('제한 시간', segB([[10, '10분'], [15, '15분'], [20, '20분'], [25, '25분'], [30, '30분']], mins, v => { mins = v; intro(); })), el('<p class="hint">시작할 때마다 수, 낱말, 암호표가 새로 바뀌어요. 1~2학년: 규칙·시간·그림 암호·낱말 / 3~4학년: 규칙·시각 계산·마법 네모·좌표 암호·추리 / 5~6학년: 수열·나머지·좌표 암호·논리 추리. 마지막 문은 앞에서 푼 답을 이용해요.</p>'));
+    const kb = el('<button class="btn dark">선생님 정답지 인쇄</button>');
+    kb.onclick = () => printPages(answerKeyPages(a, a.name, rooms.map((r, k) => [`${k + 1}번 방 · ${r.t}: ${r.q}`, `${r.ans}   (힌트: ${hintsOf(r).join(' → ')})`]), '지금 준비된 방 문제의 정답이에요. "새 문제로 다시"나 난이도를 바꾸면 문제가 바뀌니, 인쇄한 뒤에는 그대로 시작하세요.', 6));
+    ctx.opts.append(kb);
     intro();
   };
 

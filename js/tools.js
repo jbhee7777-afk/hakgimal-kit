@@ -108,8 +108,12 @@
     const g0 = Math.min(6, Math.max(1, parseInt(Store.get().grade, 10) || 2));
     let rv = { level: 1, streak: 0, right: 0, total: 0, grade: Store.d('rv:grade:' + a.n, g0), subj: Store.d('rv:subj:' + a.n, 'mix'), cur: null, answered: false };
     rv.limit = Store.d('rv:limit:' + a.n, 10); rv.qn = 0; rv.seen = new Set();
+    /* 단계별 문제를 미리 만들어 두어요 (선생님 정답지와 같은 문제) */
+    function bankMC() { const seen = new Set(); rv.bank = {}; [1, 2, 3].forEach(l => { rv.bank[l] = []; let k = 0; while (rv.bank[l].length < rv.limit && k < rv.limit * 30) { const q = makeReview(rv.grade, rv.subj, l); k++; if (seen.has(q.q + '|' + q.a)) continue; seen.add(q.q + '|' + q.a); rv.bank[l].push(q); } }); rv.full = { 1: rv.bank[1].slice(), 2: rv.bank[2].slice(), 3: rv.bank[3].slice() }; }
     function nextMC() {
-      let q, k = 0; do { q = makeReview(rv.grade, rv.subj, rv.level); k++; } while (rv.seen.has(q.q + '|' + q.a) && k < 40);
+      if (!rv.bank || rv.bankKey !== rv.grade + rv.subj + rv.limit) { bankMC(); rv.bankKey = rv.grade + rv.subj + rv.limit; }
+      let q = rv.bank[rv.level].shift(), k = 0;
+      if (!q) do { q = makeReview(rv.grade, rv.subj, rv.level); k++; } while (rv.seen.has(q.q + '|' + q.a) && k < 40);
       rv.seen.add(q.q + '|' + q.a); rv.qn++;
       rv.cur = q;
       rv.answered = false;
@@ -146,7 +150,7 @@
         draw();
       }
     }
-    function restartMC() { rv.qn = 0; rv.right = 0; rv.total = 0; rv.streak = 0; rv.seen = new Set(); nextMC(); show(); }
+    function restartMC() { rv.qn = 0; rv.right = 0; rv.total = 0; rv.streak = 0; rv.seen = new Set(); if (rv.full && rv.bankKey === rv.grade + rv.subj + rv.limit) rv.bank = { 1: rv.full[1].slice(), 2: rv.full[2].slice(), 3: rv.full[3].slice() }; rv.cur = null; nextMC(); show(); }
     function endMC() {
       clearTimers(); prog.firstChild.style.width = '100%';
       const sc = mode === 'battle' ? score.scores().slice(0, score.teams()) : null;
@@ -192,6 +196,9 @@
       ctx.opts.append(field('시작 단계', seg([[1, '1'], [2, '2'], [3, '3']], 1, v => { rv.level = v; restartMC(); })));
       ctx.opts.append(field('문제 수', seg([[10, '10문제'], [15, '15문제'], [20, '20문제']], rv.limit, v => { rv.limit = v; Store.set('rv:limit:' + a.n, v); restartMC(); })));
       ctx.opts.append(el('<p class="hint">2022 개정 교육과정 기준이에요. 수학은 학년별로 매번 새 문제가 나오고, 국어·사회·과학·통합은 학년군(1~2, 3~4, 5~6) 문제예요. 두 번 연속 맞히면 단계가 올라가요.</p>'));
+      const kb = el('<button class="btn dark">선생님 정답지 인쇄</button>');
+      kb.onclick = () => { if (!rv.full) nextMC(); const rows = []; [1, 2, 3].forEach(l => rv.full[l].forEach((q, k) => rows.push([`${l}단계 ${k + 1}. ${q.q}  (${q.o.map((o, m) => (m + 1) + ') ' + o).join('  ')})`, q.a]))); printPages(answerKeyPages(a, a.name, rows, `${rv.grade}학년 문제예요. 맞히면 단계가 올라가서 1·2·3단계 목록에서 차례로 나와요. 학년·과목·문제 수를 바꾸면 새 문제가 만들어지니 바꾼 뒤에 인쇄하세요.`, 12)); };
+      ctx.opts.append(kb);
     }
     if (mode === 'custom' || mode === 'golden') {
       const key = () => mode === 'golden' ? goldKey() : 'custom';
@@ -201,6 +208,11 @@
       sv.onclick = () => { Store.set('custom:' + a.n + key(), t.value); build(curF); show(); toast('문제를 저장했어요'); };
       if (mode === 'golden') ctx.opts.prepend(field('학년', seg([[0, '공통'], [1, '1학년'], [2, '2학년'], [3, '3학년'], [4, '4학년'], [5, '5학년'], [6, '6학년']], goldGrade, v => { goldGrade = v; Store.set('gold:grade', v); t.value = Store.d('custom:' + a.n + key(), def()); build(curF); show(); })));
       ctx.opts.append(field(`문제 고치기 (한 줄에 "질문 | 정답${mode === 'golden' ? ' | 단계 1~3' : ''}")`, t), sv);
+    }
+    if (['chosung', 'creative', 'golden', 'ox', 'fake', 'custom'].includes(mode)) {
+      const kb = el('<button class="btn dark">선생님 정답지 인쇄</button>');
+      kb.onclick = () => { if (!list.length) return toast('문제가 없어요'); printPages(answerKeyPages(a, a.name, list.map(q => mode === 'chosung' ? [`${q.q}  (힌트: ${q.h})`, q.a] : mode === 'ox' ? [q.q, `${q.a}  · ${q.e}`] : mode === 'fake' ? [q.q, `${q.a ? '진짜' : '가짜'}  · ${q.e}`] : [q.q, q.a]))); };
+      ctx.opts.append(kb, el('<p class="hint">정답지는 지금 화면에 나오는 문제 순서 그대로 인쇄돼요. 단계나 학년을 바꾸면 순서가 바뀌니, 바꾼 뒤에 인쇄하세요.</p>'));
     }
     build(); show();
   };

@@ -6,11 +6,11 @@
   const field = (t, n) => { const l = el(`<label class="f">${t}</label>`); l.appendChild(n); return l; };
 
   /* ── 활동 내용 바꾸기 ── */
-  set(14, { d: '포스트잇 칭찬 쪽지를 스캔해 우체통에서 하나씩 뽑기', steps: ['모둠 4명이 한 장을 나눠 각자 칭찬 쪽지 한 칸을 써요. (받는 친구는 미리 정해져 있어요)', '선생님이 쪽지 종이를 한꺼번에 스캔해 "작품 모음"에 올려요.', '화면 우체통에서 쪽지를 하나씩 뽑아 함께 읽어요.'], sheet: null });
+  set(14, { d: '포스트잇 칭찬 쪽지를 스캔해 우체통에서 하나씩 뽑기', steps: ['한 사람이 쪽지 종이 한 장! 정해진 네 친구에게 한 칸씩 칭찬을 써요. (나도 네 친구에게서 받아요)', '다 쓰면 자르지 말고 그대로 걷어요. 선생님이 한꺼번에 스캔해 "작품 모음"에 올리고, 그다음 잘라서 받는 친구에게 전해 줘요.', '화면 우체통에서 쪽지를 하나씩 뽑아 함께 읽어요.'], sheet: null });
   set(15, { d: '모두가 한 번씩 칭찬받도록 짝을 정해 반짝이는 점 찾기', tool: 'praise', sheet: null, steps: ['화면에서 "칭찬 짝 정하기"를 눌러요. 모두가 한 명씩 맡고, 한 명씩 칭찬받아요.', '카드에 맡은 친구의 반짝이는 점 3가지를 써요.', '마지막에 친구에게 직접 읽어 주고 건네요.'] });
   set(16, { d: '몰래 정한 친구에게 며칠 동안 응원 쪽지 보내기', steps: ['명단을 넣고 한 명씩 나와 자기 이름을 눌러 몰래 확인해요.', '응원 쪽지에 하루 한 장씩 응원의 말을 써서 몰래 전해요.', '마지막 날 "내 천사는 누구?" 함께 공개해요.'], sheet: [{ t: 'cheer' }] });
-  set(18, { d: '포스트잇 칭찬 쪽지를 스캔하면 화면 나무에 주렁주렁', steps: ['모둠 4명이 한 장을 나눠 각자 쪽지 한 칸에 칭찬을 써요. (받는 친구는 미리 정해져 있어요)', '선생님이 쪽지 종이를 스캔해 "작품 모음"에 올려요.', '화면 나무에 우리 반 쪽지가 모두 걸려요. 함께 읽어요.'], sheet: null });
-  set(21, { d: '모둠마다 한 권, 진짜 사전처럼 만드는 좋은 말 사전', steps: ['모둠에서 한 사람이 좋은 말 한 개씩 맡아요.', '표제어, 뜻, 예문, 비슷한 말을 진짜 사전처럼 써요.', '모둠 사전을 돌려 읽고, 우리 반 좋은 말 사전 한 권으로 묶어요.'], sheet: [{ t: 'dict2' }] });
+  set(18, { d: '포스트잇 칭찬 쪽지를 스캔하면 화면 나무에 주렁주렁', steps: ['한 사람이 쪽지 종이 한 장! 정해진 네 친구에게 한 칸씩 칭찬을 써요. (나도 네 친구에게서 받아요)', '다 쓰면 자르지 말고 그대로 걷어요. 선생님이 한꺼번에 스캔해 "작품 모음"에 올리고, 그다음 잘라서 받는 친구에게 전해 줘요.', '화면 나무에 우리 반 쪽지가 모두 걸려요. 함께 읽어요.'], sheet: null });
+  set(21, { d: '한 사람이 한 쪽씩 써서 반 전체가 한 권으로 묶는 좋은 말 사전', steps: ['한 사람이 한 장씩, 따뜻한 말을 하나 골라요. (친구와 겹치지 않게)', '언제 하는 말인지, 친구에게 어떻게 말할지 한 줄씩 쓰고 장면을 그려요.', '선생님이 첫 글자 ㄱㄴㄷ 순서로 묶어 우리 반 사전 한 권을 만들어요.'], sheet: [{ t: 'dict3' }] });
   set(22, { d: '정성 가득 엽서로 쓰는 마지막 인사', steps: ['엽서를 받을 친구를 정해요.', '우표를 그리고, 함께한 장면을 사진 칸에 그려요.', '고마운 마음을 담아 편지를 쓰고 직접 전해요.'], sheet: [{ t: 'postcard' }] });
   set(27, { steps: ['앞면에 내 얼굴을 그리거나 사진을 붙여요.', '뒷면에 나를 소개하는 말을 채워요.', '오려서 반으로 접으면 나만의 포토카드 완성!'], sheet: [{ t: 'photocard1' }] });
   set(56, { d: '산꼭대기까지 오르는 2027 목표 지도', steps: ['2027년에 이루고 싶은 목표 3가지를 정해요.', '깃발마다 목표와 방법을 써요.', '달마다 지켰으면 그 달에 색칠해요.'], sheet: [{ t: 'goals' }] });
@@ -43,7 +43,7 @@
   T.praise.pages = a => { const m = pairMap('praise'), names = Store.roster(); if (!m) { const p = pageFrame(a, a.name, '맡은 친구의 반짝이는 점 3가지를 찾아 써요.', { noName: true }); p.insertAdjacentHTML('beforeend', SHEET_BLOCKS.shine({})); return [p]; } const out = []; for (let k = 0; k < names.length; k += 2) { const p = pageFrame(a, a.name, '맡은 친구의 반짝이는 점 3가지를 찾아 써요.', { noName: true }); p.insertAdjacentHTML('beforeend', SHEET_BLOCKS.shine({ cards: names.slice(k, k + 2).map(w => ({ from: w, to: m[w] })) })); out.push(p); } return out; };
 
   /* ── 14·18: 포스트잇 쪽지 → 스캔 → 우체통·나무 ── */
-  const NOTE_ACT = { 14: ['칭찬 쪽지', 'mail', '모둠 4명이 한 장을 나눠 각자 한 칸씩 써요. 받는 친구가 미리 정해져 있어 모두가 한 장씩 받아요.'], 18: ['칭찬 잎', 'tree', '모둠 4명이 한 장을 나눠 각자 한 칸씩 써요. 받는 친구가 미리 정해져 있어 모두가 한 장씩 받아요.'] };
+  const NOTE_ACT = { 14: ['칭찬 쪽지', 'mail', '정해진 네 친구에게 한 칸씩 써요. 다 쓰면 자르지 말고 선생님께 내요.'], 18: ['칭찬 잎', 'tree', '정해진 네 친구에게 한 칸씩 써요. 다 쓰면 자르지 말고 선생님께 내요.'] };
   window.NOTE_ACTS = [14, 18];
   window.noteFractions = function (act) {
     const a = A(act), p = notePages(a, NOTE_ACT[act][0], NOTE_ACT[act][1], NOTE_ACT[act][2])[0];
@@ -62,7 +62,7 @@
     const free = () => { urls.forEach(u => URL.revokeObjectURL(u)); urls.length = 0; };
     async function draw() {
       free(); const notes = await noteImgs(a.n);
-      const empty = `<div class="center" style="position:absolute;inset:0"><div class="qbig" style="font-size:28px;background:rgba(255,255,255,.88);padding:14px 26px;border-radius:16px">아직 스캔한 쪽지가 없어요</div><p class="expl" style="background:rgba(255,255,255,.88);padding:10px 18px;border-radius:12px">① 쪽지 종이를 인쇄해 나눠 줘요 → ② 아이들이 한 칸씩 써요 → ③ 종이를 모아 한꺼번에 스캔해서 "작품 모음"에 올려요 → ④ 여기로 돌아오면 쪽지가 ${key === 'tree' ? '나무에 걸려요' : '우체통에 들어가요'}</p><a class="btn big dark" href="#/gallery">스캔 파일 올리러 가기</a></div>`;
+      const empty = `<div class="center" style="position:absolute;inset:0"><div class="qbig" style="font-size:28px;background:rgba(255,255,255,.88);padding:14px 26px;border-radius:16px">아직 스캔한 쪽지가 없어요</div><p class="expl" style="background:rgba(255,255,255,.88);padding:10px 18px;border-radius:12px">① 쪽지 종이를 인쇄해 나눠 줘요 → ② 한 사람이 한 장씩, 네 친구에게 한 칸씩 써요 → ③ 자르지 말고 걷어 한꺼번에 스캔해서 "작품 모음"에 올려요 → ④ 여기로 돌아오면 쪽지가 ${key === 'tree' ? '나무에 걸려요' : '우체통에 들어가요'}</p><a class="btn big dark" href="#/gallery">스캔 파일 올리러 가기</a></div>`;
       if (key === 'tree') {
         body.style.background = 'linear-gradient(#F3F7FB,#E6EEF6)';
         body.innerHTML = `<img src="img/tree.png" alt="" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:100%;max-width:100%;object-fit:contain">`;
@@ -84,7 +84,7 @@
     const pb = el('<button class="btn dark">쪽지 종이 인쇄</button>'); pb.onclick = () => printPages(pages());
     const gl = el('<a class="btn" href="#/gallery">스캔 파일 올리기</a>');
     const rf = el('<button class="btn flat">화면 새로 고침</button>'); rf.onclick = draw;
-    ctx.opts.append(pb, gl, rf, el(`<p class="hint">${hint} 명단이 있으면 받는 친구 이름과 쓰는 친구 이름이 미리 들어가요. 쪽지 종이는 자르지 말고 그대로 걷어 스캔하면 칸마다 저절로 잘라서 보여 줘요.</p>`));
+    ctx.opts.append(pb, gl, rf, el(`<p class="hint">${hint} 명단이 있으면 한 사람에 한 장씩, 받는 친구 네 명 이름이 미리 들어가요. 모두가 쪽지 4장을 받아요. 스캔하면 칸마다 저절로 잘라서 보여 주고, 스캔이 끝난 종이는 잘라서 나눠 줘요.</p>`));
   };
   T.wall.pages = a => NOTE_ACT[a.n] ? notePages(a, ...NOTE_ACT[a.n]) : [];
 
@@ -92,7 +92,7 @@
   window.selfBingoPage = function (a, words, size, title) {
     const p = el(`<div class="page" data-act="${a.n}" style="${catVars(catOf(a))};padding:0"></div>`);
     const half = Math.ceil(words.length / 2);
-    p.innerHTML = `<div data-nofill class="sbingo"><div class="sb-left"><div class="sb-title">${esc(title || a.name)}</div><div class="sb-sub">아래 낱말 중에서 골라 오른쪽 빙고판을 내가 직접 채워요.</div><div class="sb-words">${[words.slice(0, half), words.slice(half)].map(col => `<ol>${col.map(w => `<li>${esc(w)}</li>`).join('')}</ol>`).join('')}</div></div>
+    p.innerHTML = `<div data-nofill class="sbingo"><div class="sb-left"><div class="sb-title">${esc(title || a.name)}</div><div class="sb-sub">아래 낱말 중에서 골라 오른쪽 빙고판을 내가 직접 채워요.</div><div class="sb-words">${[words.slice(0, half), words.slice(half)].map((col, ci) => `<ol start="${ci ? half + 1 : 1}">${col.map(w => `<li>${esc(w)}</li>`).join('')}</ol>`).join('')}</div></div>
       <div class="sb-right"><div class="sb-name">${nameLine()}</div><div class="sb-grid" style="grid-template-columns:repeat(${size},1fr);grid-template-rows:repeat(${size},1fr)">${Array(size * size).fill('<div></div>').join('')}</div><div class="sb-foot">빙고 줄 수: ○ ○ ○ ○ ○</div></div></div>`;
     return p;
   };
@@ -131,7 +131,7 @@
   }
 
   /* ── 26 포토존: 손팻말 여러 모양 + 전자칠판 배경판 ── */
-  const SIGNS = ['한 학년 끝!', '새 학년 간다!', '우리 반 최고', '고마워요 선생님', '2027 새 출발', '방학이다!', '우정 영원히', '사랑해 우리 반', '많이 컸지?', '해냈다!'];
+  const SIGNS = ['한 학년 끝!', '새 학년 간다!', '우리 반 최고', '고마워요 선생님', '2027 새 출발', '방학이다!', '우정 영원히', '사랑해 우리 반', '많이 컸지?', '해냈다!', '1년 동안 고마웠어', '3학년 기다려!', '우리 반 사진관', '오늘의 주인공', '최고의 짝꿍', '수고했어 나 자신', '웃음 가득 우리 반', '친구야 고마워', '선생님 사랑해요', '함께라서 좋았어', '추억 저장 중', '반짝반짝 우리 반', '새해 복 많이', '또 만나자!'];
   set(26, { signs: SIGNS, steps: ['손팻말을 골라 인쇄하고 색칠해 막대에 붙여요.', '전자칠판에 포토존 배경을 띄워요.', '모둠별로 차례를 정해 배경 앞에서 찍어요.'] });
   window.openBackdrop = function (imgs, text, kidsText) {
     let i = 0;
@@ -147,12 +147,28 @@
   T.guide = function (a, ctx) {
     baseGuide(a, ctx);
     if (a.n !== 26) return;
-    ctx.print(() => printPages(signPages(a, SIGNS)));
+    ctx.print(() => printPages(signPages(a, SIGNS.filter(x => Store.d('signs:pick', SIGNS).includes(x)).concat(Store.d('signs:own', '').split('\n').map(x => x.trim()).filter(Boolean)))));
     const bd = el('<button class="btn dark big" style="justify-content:center">전자칠판 포토존 배경 띄우기</button>');
     bd.onclick = () => openBackdrop(['img/bg/bg1.jpg', 'img/bg/bg2.jpg', 'img/bg/bg3.jpg', 'img/bg/bg4.jpg', 'img/bg/bg6.jpg'], `${className() || '우리 반'} 2026 ♥`);
-    const sp = el('<button class="btn">손팻말 10가지 인쇄</button>'); sp.onclick = () => printPages(signPages(a, SIGNS));
-    const pv = el('<button class="btn flat">손팻말 미리 보기</button>'); pv.onclick = () => { const b = $('.stagebody', ctx.stage); b.innerHTML = ''; showPaper(b, signPages(a, SIGNS).slice(0, 2)); };
-    ctx.opts.prepend(bd); ctx.opts.append(sp, pv, el('<p class="hint">배경 위 글자는 눌러서 바로 고칠 수 있어요. 전자칠판 앞에 서서 찍으면 사진관처럼 나와요.</p>'));
+    let pick = Store.d('signs:pick', SIGNS.slice());
+    const ta = el(`<textarea rows="3" placeholder="우리 반만의 문구를 한 줄에 하나씩 써요">${esc(Store.d('signs:own', ''))}</textarea>`);
+    const own = () => ta.value.split('\n').map(x => x.trim()).filter(Boolean);
+    const chosen = () => SIGNS.filter(x => pick.includes(x)).concat(own());
+    const sp = el('<button class="btn">고른 손팻말 인쇄</button>'); sp.onclick = () => { const c = chosen(); if (!c.length) return toast('손팻말을 하나 이상 골라요'); printPages(signPages(a, c)); };
+    const pv = el('<button class="btn flat">손팻말 고르기</button>');
+    const gallery = () => { const b = $('.stagebody', ctx.stage); if (!b) return; const all = SIGNS.concat(own()); const pages = signPages(a, all);
+      b.innerHTML = `<div class="signpick"><div class="sp-top"><b>인쇄할 손팻말을 눌러 골라요</b><span><button class="btn flat" data-all>모두 고르기</button><button class="btn flat" data-none>모두 빼기</button></span></div><div class="sp-grid"></div></div>`;
+      const g = $('.sp-grid', b);
+      pages.forEach((pg, i) => { const t = all[i], isOwn = i >= SIGNS.length; const c = el(`<button class="sp-item${isOwn || pick.includes(t) ? ' on' : ''}" type="button"></button>`); c.appendChild($('svg', pg)); c.insertAdjacentHTML('beforeend', '<i></i>');
+        if (!isOwn) c.onclick = () => { pick = pick.includes(t) ? pick.filter(x => x !== t) : pick.concat(t); Store.set('signs:pick', pick); c.classList.toggle('on'); sp.textContent = `고른 손팻말 ${chosen().length}장 인쇄`; };
+        g.appendChild(c); });
+      $('[data-all]', b).onclick = () => { pick = SIGNS.slice(); Store.set('signs:pick', pick); gallery(); };
+      $('[data-none]', b).onclick = () => { pick = []; Store.set('signs:pick', pick); gallery(); };
+      sp.textContent = `고른 손팻말 ${chosen().length}장 인쇄`; };
+    pv.onclick = gallery;
+    ta.oninput = () => { Store.set('signs:own', ta.value); };
+    ta.onchange = gallery;
+    ctx.opts.prepend(bd); ctx.opts.append(pv, field('우리 반 문구 더하기', ta), sp, el('<p class="hint">손팻말은 24가지 문구, 12가지 모양이에요. 배경 위 글자는 눌러서 바로 고칠 수 있어요. 전자칠판 앞에 서서 찍으면 사진관처럼 나와요.</p>'));
   };
 
   /* ── 80 장기자랑: 무대 배경이 무작위로 ── */

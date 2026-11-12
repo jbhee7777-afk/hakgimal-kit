@@ -47,6 +47,9 @@
     const fi = el('<input type="file" accept="image/*" multiple>');
     fi.onchange = () => { const fs = Array.from(fi.files); if (!fs.length) return; items = shuffle(fs.map(f => ({ src: URL.createObjectURL(f), name: f.name.replace(/\.[^.]+$/, ''), kind: 'photo' }))); i = 0; show(); toast(`사진 ${fs.length}장을 넣었어요`); };
     ctx.opts.append(lab('문제 그림', seg([['mix', '섞어서'], ['pic', '그림 11장'], ['photo', '실사 사진 16장']], set, v => { set = v; Store.set('zoom:set', v); reset(); show(); })), lab('보는 방법', seg([['mix', '골고루'], ['zoom', '확대'], ['shadow', '그림자'], ['mosaic', '모자이크']], 'mix', v => { mode = v; show(); })), lab('우리 반 사진 넣기 (선택)', fi), el('<p class="hint">그림자 문제는 배경이 하얀 그림에서만 나와요. 사진을 넣으면 파일 이름이 정답이 돼요.</p>'));
+    const kb = el('<button class="btn dark">선생님 정답지 인쇄</button>');
+    kb.onclick = () => printPages(answerKeyPages(a, a.name, items.map(it => [it.kind === 'photo' ? '실사 사진' : '그림', it.name]), '화면에 나오는 순서 그대로예요. "문제 그림"을 바꾸면 순서가 바뀌어요.', 27));
+    ctx.opts.append(kb);
     show();
   };
 })();

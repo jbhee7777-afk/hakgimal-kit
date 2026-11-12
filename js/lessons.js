@@ -74,8 +74,9 @@
       const s = S[i];
       $$('button', dots).forEach((d, k) => d.classList.toggle('on', k === i));
       $('.lsn-count', wrap).textContent = `${i + 1} / ${S.length}`;
-      slide.className = 'lsn-slide t-' + s.t;
-      slide.style.backgroundImage = s.bg ? `linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.55)), url(${s.bg})` : '';
+      slide.className = 'lsn-slide t-' + s.t + (L.theme ? ` th-${L.theme.m} lay-${L.lay || 0}` : '');
+      if (L.theme) { const o = L.theme.m === 'dark' || L.theme.m === 'cork' ? 0 : s.t === 'cover' ? .15 : .4; slide.style.backgroundImage = `linear-gradient(rgba(255,255,255,${o}), rgba(255,255,255,${o})), url(${L.theme.bg})`; }
+      else slide.style.backgroundImage = s.bg ? `linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.55)), url(${s.bg})` : '';
       slide.style.backgroundSize = 'cover';
       slide.innerHTML = render(s);
       bind(s);

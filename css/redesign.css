@@ -155,3 +155,59 @@
 .page .ln { border-bottom: 1.8px solid var(--line); }
 .page .bubble .ln { border-bottom: 0; }
 .medal-in { top: 64%; width: 50%; } .mpic { width: 110px; height: 76px; }
+
+.page.example .dword i .exw, .page.example .dword span.exw { background: none; color: #2366C2; font-size: 22px; padding: 0 0 0 4px; border-radius: 0; }
+
+/* 좋은 말 사전 한 쪽 */
+.d3 { flex: 1; display: flex; flex-direction: column; gap: 18px; padding-top: 6px; }
+.d3-top { display: flex; gap: 18px; align-items: stretch; border-bottom: 4px double var(--c); padding-bottom: 16px; }
+.d3-tab { width: 104px; background: var(--t); border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+.d3-tab span { font-size: 14px; color: var(--c); font-weight: 700; } .d3-tab i { width: 60px; height: 60px; border: 2px dashed var(--c); border-radius: 50%; background: #fff; display: grid; place-items: center; font-style: normal; }
+.d3-word { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; } .d3-word span { font-size: 16px; color: #56627A; font-weight: 700; }
+.d3-word .d3w { display: block; height: 70px; border-bottom: 3px solid #1F2B45; font-style: normal; }
+.d3-q { display: flex; gap: 14px; } .d3-q > b { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--c); color: #fff; display: grid; place-items: center; font-size: 18px; }
+.d3-q > div { flex: 1; display: flex; flex-direction: column; } .d3-l { font-size: 19px; font-weight: 700; color: #1F2B45; margin: 4px 0 8px; }
+.d3-line { display: block; height: 52px; border-bottom: 2px solid var(--line); font-style: normal; }
+.d3-bub { border: 2px solid var(--c); border-radius: 26px; padding: 0 22px 10px; position: relative; } .d3-bub::after { content: ''; position: absolute; left: 40px; bottom: -14px; border: 7px solid transparent; border-top: 8px solid var(--c); }
+.d3-grow { flex: 1; } .d3-pic { flex: 1; min-height: 200px; border: 2px dashed #B8C1CF; border-radius: 18px; }
+.d3-foot { text-align: center; font-size: 13px; color: #8A95A8; }
+.page.example .d3-pic { position: relative; }
+
+/* 손팻말 고르기 */
+.signpick { position: absolute; inset: 0; overflow: auto; padding: 18px 22px; background: #FBFCFE; }
+.sp-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-size: 20px; } .sp-top span { display: flex; gap: 8px; }
+.sp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+.sp-item { position: relative; background: #fff; border: 2px solid #E3E8F0; border-radius: 14px; padding: 10px; cursor: pointer; opacity: .45; transition: opacity .15s, border-color .15s; }
+.sp-item svg { width: 100%; height: auto; display: block; }
+.sp-item.on { opacity: 1; border-color: var(--c, #2366C2); }
+.sp-item i { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #C3CBD8; background: #fff; }
+.sp-item.on i { background: var(--c, #2366C2); border-color: var(--c, #2366C2); }
+.sp-item.on i::after { content: ''; position: absolute; left: 8px; top: 3px; width: 6px; height: 12px; border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg); }
+.page.example .d3w .exw { font-size: 46px; } .page.example .d3-tab i .exw { font-size: 30px; padding: 0; }
+.page.example .d3w, .page.example .d3-line { display: flex; align-items: flex-end; }
+
+/* 포토카드 가로형 */
+.pc1-card { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; width: 700px; height: 800px; }
+.pc1-front { border-right: 0; border-bottom: 3px dashed #9AA6B8; display: grid; grid-template-columns: 300px 1fr; grid-template-rows: 1fr auto auto; gap: 12px 22px; align-items: end; padding: 24px 28px; }
+.pc1-front .pc1-photo { grid-row: 1 / 4; width: auto; height: 100%; }
+.pc1-front .pc1-name { align-self: end; height: 56px; position: relative; } .pc1-front .pc1-name::before { content: '이름'; position: absolute; top: -18px; left: 0; font-size: 14px; color: #56627A; }
+.pc1-front .pc1-tag { justify-self: start; }
+.pc1-back { padding: 22px 30px; gap: 4px; }
+.pc1-front { grid-template-rows: auto 1fr auto; }
+.pc1-front .pc1-tag { grid-column: 2; grid-row: 1; align-self: start; font-size: 22px; padding: 8px 22px; }
+.pc1-front .pc1-name { grid-column: 2; grid-row: 3; display: flex; align-items: flex-end; }
+.pc1-front .pc1-name .exw { font-size: 30px; }
+.pc1-word { grid-column: 2; grid-row: 2; align-self: center; display: flex; flex-direction: column; gap: 6px; }
+.pc1-word span { font-size: 15px; color: #56627A; font-weight: 700; }
+.pc1-word i { display: flex; align-items: flex-end; height: 64px; border: 2px dashed #C9B98C; border-radius: 14px; background: rgba(255,255,255,.7); padding: 0 12px 8px; font-style: normal; }
+.page.example .pc1-name .exw { font-size: 28px !important; }
+
+/* 선생님 정답지 */
+.akey { width: 100%; border-collapse: collapse; font-size: 16px; margin-top: 6px; }
+.akey th { background: var(--t); color: #1F2B45; padding: 8px; border: 1.5px solid var(--line); font-size: 15px; }
+.akey td { border: 1.5px solid var(--line); padding: 9px 12px; vertical-align: top; line-height: 1.45; word-break: keep-all; }
+.akey td.n { text-align: center; font-weight: 700; color: var(--c); }
+.akey td.a { font-weight: 700; color: #2366C2; }
+.esc-hints { display: flex; flex-direction: column; gap: 8px; max-width: 860px; }
+.esc-hints p { margin: 0; background: #FFF7D6; border-radius: 14px; padding: 10px 18px; font-size: clamp(17px, 1.7vw, 24px); text-align: left; }
+.esc-hints p b { display: inline-block; background: #F5B700; color: #fff; border-radius: 10px; padding: 1px 10px; margin-right: 10px; font-size: .8em; }
