@@ -23,4 +23,75 @@
       <p>아직 만나지 않은 친구 3명과 새해 인사를 나누고 이름을 받아요.</p>
       <div class="wk-row">${[1, 2, 3].map(k => `<span class="wk-sg"><em>${k}</em><i></i></span>`).join('')}</div></div>
   </div>`;
+
+  /* ── 교실 화면: 미션마다 새 짝, 도착하면 아직 못 만난 친구 ── */
+  const T = window.TOOLS;
+  const ROUNDS = [1, 2, 3, 4, 5, 6]; /* 미션 2~7 */
+  function schedule(names) {
+    let order = Store.d('walk:order', null);
+    if (!order || order.length !== names.length || names.some(n => !order.includes(n))) { order = shuffle(names); Store.set('walk:order', order); }
+    const L = order.slice(); if (L.length % 2) L.push(null);
+    const n = L.length, rounds = [], met = new Set(), key = (x, y) => x < y ? x + '|' + y : y + '|' + x;
+    for (let r = 0; r < Math.min(ROUNDS.length, n - 1); r++) {
+      const rest = L.slice(1), m = rest.length, rot = [L[0], ...rest.map((_, i) => rest[(i - r + m * 10) % m])];
+      const pairs = []; let solo = null;
+      for (let i = 0; i < n / 2; i++) { const a = rot[i], b = rot[n - 1 - i]; if (a && b) pairs.push([a, b]); else solo = a || b; }
+      if (solo && pairs.length) {
+        const fresh = pairs.map((g, i) => [i, g.filter(x => met.has(key(x, solo))).length]).sort((p, q) => p[1] - q[1] || q[0] - p[0]);
+        pairs[fresh[0][0]].push(solo);
+      }
+      pairs.forEach(g => g.forEach(x => g.forEach(y => { if (x !== y) met.add(key(x, y)); })));
+      rounds.push(pairs);
+    }
+    return rounds;
+  }
+  function unmet(names, rounds) {
+    const met = Object.fromEntries(names.map(n => [n, new Set([n])]));
+    rounds.forEach(ps => ps.forEach(g => g.forEach(x => g.forEach(y => met[x].add(y)))));
+    const seed = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) | 0; return h; };
+    return names.map(n => { const left = names.filter(x => !met[n].has(x)).sort((a, b) => (seed(n + a) & 255) - (seed(n + b) & 255)); return [n, left.slice(0, 3)]; });
+  }
+  T.walk = function (a, ctx) {
+    const st = ctx.stage, names = Store.roster();
+    const body = el('<div class="stagebody wkt"></div>'); st.appendChild(body);
+    let r = 0, timer = null, mins = Store.d('walk:min', 3);
+    const pb = el('<button class="btn dark">산책 활동지 인쇄</button>'); pb.onclick = () => printPages(Array.from({ length: Math.max(1, names.length) }, () => buildSheet(a, a.sheet)));
+    ctx.print(() => pb.onclick());
+    if (names.length < 4) {
+      body.innerHTML = `<div class="center"><div class="qbig" style="font-size:30px">우리 반 명단을 넣으면 산책 짝을 정해 줘요</div><p class="expl">미션마다 반 전체가 새 짝을 만나고, 도착하면 아직 못 만난 친구 3명을 알려 줘요. 명단은 4명 이상 필요해요.</p><button class="btn big dark" data-set>우리 반 명단 넣기</button></div>`;
+      $('[data-set]', body).onclick = () => openSettings();
+      ctx.opts.append(pb); return;
+    }
+    let rounds = schedule(names);
+    const total = rounds.length;
+    function draw() {
+      clearTimers(); timer = null;
+      if (r < total) {
+        const k = ROUNDS[r], [title, q] = STOPS[k];
+        body.innerHTML = `<div class="wkt-in"><div class="wkt-head"><div class="wkt-step">${rounds.map((_, j) => `<i class="${j < r ? 'done' : j === r ? 'now' : ''}">${ROUNDS[j] + 1}</i>`).join('')}<i class="${r === total ? 'now' : ''}">도착</i></div><div data-t></div></div>
+          <div class="wkt-title"><span>미션 ${k + 1}</span><b>${title}</b><p>${q}</p></div>
+          <div class="wkt-pairs">${rounds[r].map(g => `<div class="wkt-p">${g.map(x => `<span>${esc(x)}</span>`).join('<em><svg viewBox="0 0 24 24" style="width:.9em;height:.9em"><path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z" fill="#F4B6C2"/></svg></em>')}</div>`).join('')}</div>
+          <div class="ctrl"><button class="btn big" data-p ${r ? '' : 'disabled'}>이전 미션</button><button class="btn big dark" data-ts>${mins}분 시작</button><button class="btn big dark" data-n>${r === total - 1 ? '도착!' : '다음 미션'}</button></div></div>`;
+        timer = makeTimer({ sec: mins * 60, onEnd: () => toast('시간이 다 됐어요. 다음 미션으로!') }); $('[data-t]', body).appendChild(timer.node);
+        $('[data-ts]', body).onclick = () => { timer.start(); beep('pop'); };
+      } else {
+        const list = unmet(names, rounds);
+        body.innerHTML = `<div class="wkt-in"><div class="wkt-head"><div class="wkt-step">${rounds.map((_, j) => `<i class="done">${ROUNDS[j] + 1}</i>`).join('')}<i class="now">도착</i></div></div>
+          <div class="wkt-title"><span>도착!</span><b>아직 못 만난 친구와 인사해요</b><p>내 이름 옆의 친구를 찾아가 새해 인사를 하고, 활동지 맨 아래에 이름을 받아요.</p></div>
+          <div class="wkt-un">${list.map(([n, l]) => `<div><b>${esc(n)}</b><span>${l.length ? l.map(esc).join(' · ') : '모두 만났어요!'}</span></div>`).join('')}</div>
+          <div class="ctrl"><button class="btn big" data-p>이전 미션</button></div></div>`;
+        confetti(st);
+      }
+      $('[data-p]', body) && ($('[data-p]', body).onclick = () => { r = Math.max(0, r - 1); draw(); });
+      $('[data-n]', body) && ($('[data-n]', body).onclick = () => { r++; beep('fan'); draw(); });
+    }
+    const seg = el('<div class="seg"></div>');
+    [2, 3, 4, 5].forEach(m => { const b = el(`<button class="${m === mins ? 'on' : ''}">${m}분</button>`); b.onclick = () => { mins = m; Store.set('walk:min', m); $$('button', seg).forEach(x => x.classList.remove('on')); b.classList.add('on'); draw(); }; seg.appendChild(b); });
+    const lab = el('<label class="f">미션 한 개 시간</label>'); lab.appendChild(seg);
+    const nw = el('<button class="btn flat">짝 새로 섞기</button>'); nw.onclick = () => { if (!confirm('산책 짝을 새로 섞을까요?')) return; Store.set('walk:order', null); rounds = schedule(names); r = 0; draw(); };
+    const rs = el('<button class="btn flat">처음 미션으로</button>'); rs.onclick = () => { r = 0; draw(); };
+    ctx.opts.append(lab, pb, rs, nw, el(`<p class="hint">미션 2~7마다 반 전체가 겹치지 않는 새 짝을 만나요. 미션 1(인사 3명)과 미션 8(선생님 사인)은 자유롭게 해요. 마지막 "도착!" 화면에 아이마다 아직 못 만난 친구 3명이 나와요.${names.length % 2 ? ' 인원이 홀수라 한 모둠은 3명이에요.' : ''}</p>`));
+    draw();
+  };
+  T.walk.pages = a => [buildSheet(a, a.sheet)];
 })();

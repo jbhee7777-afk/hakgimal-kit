@@ -86,3 +86,17 @@
 .page.sb .d3-pic { border-color: color-mix(in srgb, var(--pill) 85%, #E2D3C4); }
 .page.sb div[style*="border:2px solid #9AA6B8"] { border-color: color-mix(in srgb, var(--pill) 90%, #E2D3C4) !important; }
 .page.sb .dword i, .page.sb .d3w, .page.sb .nc-name i, .page.sb .pc1-name { border-bottom-color: #A99D90 !important; }
+
+/* ── 산책 짝 화면 ── */
+.stagebody.wkt { background: #FFFBF2; }
+.wkt-in { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 14px; padding: clamp(14px, 2vw, 28px); }
+.wkt-head { display: flex; justify-content: space-between; align-items: center; }
+.wkt-step { display: flex; gap: 8px; } .wkt-step i { font-style: normal; min-width: 40px; height: 40px; padding: 0 10px; border-radius: 20px; display: grid; place-items: center; background: #F1E9DC; color: #8A7F74; font-weight: 800; font-size: 17px; }
+.wkt-step i.done { background: #D5ECDF; color: #2F6B4A; } .wkt-step i.now { background: #F7C9A8; color: #6B3A1A; transform: scale(1.12); }
+.wkt-title { text-align: center; } .wkt-title span { display: inline-block; background: #FFE9C7; color: #8A5A10; font-weight: 800; padding: 4px 16px; border-radius: 999px; font-size: clamp(15px, 1.5vw, 20px); }
+.wkt-title b { display: block; font-size: clamp(30px, 4vw, 58px); color: #2E2A26; margin-top: 6px; } .wkt-title p { margin: 4px 0 0; font-size: clamp(17px, 1.9vw, 26px); color: #5A524B; }
+.wkt-pairs { flex: 1; min-height: 0; overflow: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; align-content: start; }
+.wkt-p { background: #fff; border: 2px solid #F1E2CC; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: clamp(20px, 2.2vw, 30px); font-weight: 800; color: #2E2A26; flex-wrap: wrap; }
+.wkt-p em { font-style: normal; font-size: .6em; color: #A99D90; font-weight: 700; }
+.wkt-un { flex: 1; min-height: 0; overflow: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; align-content: start; }
+.wkt-un > div { background: #fff; border: 2px solid #F3DFA6; border-radius: 18px; padding: 10px 16px; display: flex; flex-direction: column; } .wkt-un b { font-size: clamp(19px, 1.9vw, 26px); color: #6B5300; } .wkt-un span { font-size: clamp(16px, 1.6vw, 22px); color: #2E2A26; font-weight: 700; }
