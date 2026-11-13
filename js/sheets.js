@@ -13,7 +13,11 @@
   window.pageFrame = function (a, title, guide, opt) {
     opt = opt || {};
     const c = catOf(a);
-    const p = el(`<div class="page" data-act="${a.n}" style="${catVars(c)}"><div class="ph"><div class="pnum">${esc(c.name)} · 활동 ${a.no}</div><div class="pt">${ed(esc(title || a.name))}</div><img class="psticker" src="img/cat${c.id}.png" alt=""></div>${opt.noName ? '' : `<div class="pmeta">${nameLine()}</div>`}${guide ? `<p class="pg">${ed(esc(guide))}</p>` : ''}</div>`);
+    const k = a.n || 0, pick = (arr, s) => arr[(k * s + c.id) % arr.length], W = f => `img/wc/${f}.png`;
+    const tl = pick(['bunny', 'cat', 'bear', 'bunny', 'cat'], 3), tr = pick(['squirrel', 'bluebird', 'letterbird', 'squirrel', 'butterfly', 'bluebird'], 5);
+    const bl = pick(['mushroom', 'bouquet', 'leaf', 'mushroom'], 7), br = c.id === 6 ? 'snowman' : pick(['books', 'openbook', 'pencils', 'gift', 'star', 'books'], 11);
+    const deco = `<img class="sb-tl" src="${W(tl)}" alt=""><img class="sb-tr" src="${W(tr === tl ? 'bluebird' : tr)}" alt=""><img class="sb-bl" src="${W(bl)}" alt=""><img class="sb-br" src="${W(br)}" alt="">`;
+    const p = el(`<div class="page sb" data-act="${a.n}" style="${catVars(c)}">${deco}<div class="ph"><div class="pnum">${esc(c.name)} · 활동 ${a.no}</div><div class="pt">${ed(esc(title || a.name))}</div><img class="psticker" src="img/cat${c.id}.png" alt=""></div>${opt.noName ? '' : `<div class="pmeta">${nameLine()}</div>`}${guide ? `<p class="pg">${ed(esc(guide))}</p>` : ''}</div>`);
     return p;
   };
 

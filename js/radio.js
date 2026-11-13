@@ -8,7 +8,7 @@
   const TOPICS = ['고마운 친구', '웃겼던 일', '자랑하고 싶은 일', '선생님께'];
 
   function card() {
-    return `<div class="rcard"><div class="rc-top"><div class="rc-fm"><b>FM 2.3</b><span>${esc(station())}</span></div>${WAVE('rgba(255,255,255,.75)')}<div class="rc-onair">사연 엽서</div></div>
+    return `<div class="rcard"><div class="rc-top"><div class="rc-fm"><b>FM 2.3</b><span>${esc(station())}</span></div>${WAVE('#9DB8D6')}<div class="rc-onair">사연 엽서</div></div>
       <div class="rc-body">
         <div class="rc-topics"><span class="rc-lab">사연 주제</span>${TOPICS.map(t => `<span class="rc-ck">${BOX}${t}</span>`).join('')}</div>
         <div class="rc-hello">DJ 선생님, 제 사연을 들려 드릴게요.</div>

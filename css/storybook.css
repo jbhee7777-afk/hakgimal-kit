@@ -1,0 +1,88 @@
+/* ── 동화책 수채화 활동지 (모든 인쇄 활동지 공통) ── */
+.page.sb { background: #FFFEFA; padding: 34px 46px 78px; gap: 14px; counter-reset: sec; --pill: color-mix(in srgb, var(--t) 70%, #FFE6D6); --pillink: color-mix(in srgb, var(--c) 78%, #3B2A20); }
+.page.sb::before { inset: 12px; border: 1.5px solid color-mix(in srgb, var(--c) 18%, #F1E7DA); border-radius: 26px; }
+.page.sb::after { display: none; }
+
+/* 위쪽 모서리 그림 (활동 공간을 침범하지 않게 작게) */
+.page.sb .sb-tl, .page.sb .sb-tr { position: absolute; top: 18px; height: 108px; width: auto; max-width: 150px; object-fit: contain; pointer-events: none; z-index: 1; }
+.page.sb .sb-tl { left: 22px; } .page.sb .sb-tr { right: 22px; }
+.page.sb .sb-bl, .page.sb .sb-br { position: absolute; bottom: 16px; height: 62px; width: auto; max-width: 190px; object-fit: contain; pointer-events: none; z-index: 1; }
+.page.sb .sb-bl { left: 22px; } .page.sb .sb-br { right: 22px; }
+.page.sb .sb-pg { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); font-size: 12px; color: var(--pillink); background: var(--pill); padding: 3px 14px; border-radius: 12px; opacity: .85; }
+
+/* 제목: 가운데 파스텔 리본 */
+.page.sb .ph { background: none; border-radius: 0; padding: 4px 150px 0; min-height: 0; margin: 0; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.page.sb .ph .psticker { display: none; }
+.page.sb .ph .pnum { background: none; color: var(--pillink); font-size: 13px; padding: 0; margin: 0; opacity: .8; letter-spacing: .5px; }
+.page.sb .ph .pt { position: relative; background: var(--pill); color: #2E2A26; font-size: 30px; line-height: 1.2; padding: 10px 40px 11px; border-radius: 999px; box-shadow: 0 3px 0 color-mix(in srgb, var(--pill) 70%, #E8D5C4); max-width: 100%; word-break: keep-all; }
+.page.sb .ph .pt::before, .page.sb .ph .pt::after { content: ''; position: absolute; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: #fff; opacity: .9; }
+.page.sb .ph .pt::before { left: 16px; } .page.sb .ph .pt::after { right: 16px; }
+
+/* 이름 칸: 둥근 테두리 */
+.page.sb .pmeta { justify-content: center; margin: 2px 110px 0; }
+.page.sb .pmeta .pname { border: 1.8px solid var(--pill); border-radius: 14px; padding: 7px 18px; background: #fff; font-size: 16px; color: #3A3530; }
+.page.sb .pmeta i { border-bottom-color: color-mix(in srgb, var(--c) 30%, #CFC6BA); }
+.page.sb .pg { font-size: 15.5px; color: #4E4842; margin: 2px 0 0; padding: 8px 14px; background: color-mix(in srgb, var(--pill) 30%, #fff); border-radius: 14px; }
+.page.sb .pg::before { background: var(--pillink); opacity: .55; }
+
+/* 활동 번호 + 파스텔 라벨 */
+.page.sb .blk-label { counter-increment: sec; position: relative; background: var(--pill); color: #2E2A26; font-size: 17px; font-weight: 700; padding: 5px 16px 5px 14px; border-radius: 999px; margin-left: 50px; margin-bottom: 6px; }
+.page.sb .blk-label::before { content: counter(sec); position: absolute; left: -50px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: var(--pill); color: var(--pillink); font-size: 21px; font-weight: 800; display: grid; place-items: center; box-shadow: none; }
+.page.sb .blk-label::after { content: ''; position: absolute; left: -17px; top: 50%; width: 12px; height: 18px; margin-top: -9px; background: color-mix(in srgb, #7FB77E 85%, var(--c)); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 18'%3E%3Cpath d='M6 18V7M6 9C3 9 1 7 1 4c3 0 5 2 5 5zM6 11c3 0 5-2 5-5-3 0-5 2-5 5z' fill='black' stroke='black' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 18'%3E%3Cpath d='M6 18V7M6 9C3 9 1 7 1 4c3 0 5 2 5 5zM6 11c3 0 5-2 5-5-3 0-5 2-5 5z' fill='black' stroke='black' stroke-width='1.2'/%3E%3C/svg%3E") center/contain no-repeat; }
+
+/* 쓰기 줄: 얇고 연하게 */
+.page.sb .lines .ln, .page.sb .ln { border-bottom: 1.3px solid color-mix(in srgb, var(--c) 16%, #D9D2C8); }
+
+/* 그림 칸: 둥근 사각형 */
+.page.sb .box { border: 2px solid color-mix(in srgb, var(--pill) 85%, #E9D8C8); border-radius: 20px; background: #fff; }
+.page.sb .box .bl { background: #fff; color: #6B625A; border: 1.5px solid var(--pill); border-radius: 12px; font-size: 13.5px; padding: 1px 12px; }
+
+/* 표 */
+.page.sb table.pt { border: 1.8px solid color-mix(in srgb, var(--pill) 85%, #E2D3C4); border-radius: 18px; }
+.page.sb table.pt th { background: color-mix(in srgb, var(--pill) 75%, #fff); color: #2E2A26; border-color: color-mix(in srgb, var(--pill) 80%, #E2D3C4); }
+.page.sb table.pt td { border-color: color-mix(in srgb, var(--pill) 60%, #EDE3D8); }
+.page.sb table.pt td.lab { background: color-mix(in srgb, var(--pill) 28%, #fff); }
+
+/* 오려 쓰는 카드 */
+.page.sb .cutgrid { border-color: color-mix(in srgb, var(--pill) 90%, #E2D3C4); }
+.page.sb .cutgrid > div { border-color: color-mix(in srgb, var(--pill) 90%, #E2D3C4); }
+.page.sb .cutgrid .ct { background: var(--pill); color: #2E2A26; border-radius: 999px; }
+
+@media print { .page.sb .ph .pt, .page.sb .blk-label, .page.sb .pg, .page.sb .sb-tl, .page.sb .sb-tr, .page.sb .sb-bl, .page.sb .sb-br { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
+/* 강한 색 블록을 파스텔로 */
+.page.sb .rcard { border-color: #BFD3E8; border-width: 2px; }
+.page.sb .rc-top { background: #DCEAF7; color: #2E3A52; }
+.page.sb .rc-fm b { color: #E07A5F; } .page.sb .rc-onair { background: #F6C9D3; color: #6B2C3B; }
+.page.sb .rc-wave path { stroke: #9DB8D6; }
+.page.sb .nc-job span { color: #3A3530; }
+.page.sb .ncard, .page.sb .note { box-shadow: none; }
+.page.sb [style*="font-size:44px;font-weight:700;color:var(--c)"], .page.sb [style*="font-size:34px;font-weight:700;color:var(--c)"] { color: var(--pillink) !important; }
+
+/* ── 우리 반 마지막 산책 ── */
+.wk { flex: 1; position: relative; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.wk-path { position: absolute; left: 0; top: 0; width: 100%; height: calc(100% - 170px); z-index: 0; }
+.wk-grid { position: relative; z-index: 1; flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 1fr); gap: 16px 70px; padding: 0 6px; }
+.wk-stop { background: #fff; border: 2px solid var(--wc); border-radius: 22px; padding: 10px 16px 12px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 4px 0 color-mix(in srgb, var(--wc) 60%, #fff); }
+.wk-h { display: flex; align-items: center; gap: 8px; }
+.wk-n { width: 30px; height: 30px; border-radius: 50%; background: var(--wc); color: #4A3F36; font-weight: 800; font-size: 17px; display: grid; place-items: center; flex: none; }
+.wk-h b { font-size: 18px; color: #2E2A26; background: color-mix(in srgb, var(--wc) 55%, #fff); padding: 2px 14px; border-radius: 999px; }
+.wk-stop p { margin: 2px 0 0; font-size: 14px; color: #5A524B; }
+.wk-row { display: flex; gap: 14px; align-items: flex-end; margin-top: auto; }
+.wk-f { flex: 1; display: flex; align-items: flex-end; gap: 6px; font-size: 14px; color: #5A524B; } .wk-f b { font-weight: 700; white-space: nowrap; }
+.wk-f i { height: 28px; border-bottom: 1.4px solid #D6CCC0; display: flex; align-items: flex-end; font-style: normal; }
+.wk-ck { flex: 1; display: flex; align-items: flex-end; gap: 5px; font-size: 14px; } .wk-ck i { flex: 1; height: 26px; border-bottom: 1.4px solid #D6CCC0; display: flex; align-items: flex-end; font-style: normal; } .wk-ck em { font-style: normal; color: #5A524B; }
+.wk-sign { font-size: 13px; color: #8A7F74; margin-top: 6px; } .wk-sign i { width: 90px; height: 22px; border-bottom: 1.4px solid #D6CCC0; }
+.wk-end { position: relative; z-index: 1; background: #FFF8E4; border: 2px solid #F3DFA6; border-radius: 24px; padding: 10px 22px 14px; display: flex; flex-direction: column; gap: 6px; }
+.wk-eh { display: flex; align-items: center; justify-content: center; gap: 12px; } .wk-eh img { height: 38px; } .wk-eh b { font-size: 22px; color: #6B5300; }
+.wk-end p { margin: 0; font-size: 14px; color: #5A524B; text-align: center; }
+.wk-sg { flex: 1; display: flex; align-items: flex-end; gap: 8px; border: 1.5px solid #F0D9A0; border-radius: 14px; padding: 6px 12px; background: #fff; } .wk-sg em { font-style: normal; font-weight: 800; color: #B08A1E; } .wk-sg i { flex: 1; height: 24px; border-bottom: 1.4px solid #E6D6B0; display: flex; align-items: flex-end; font-style: normal; }
+.page.sb:has(.wk) .sb-bl, .page.sb:has(.wk) .sb-br { display: none; }
+.page.sb:has(.wk) { padding-bottom: 44px; }
+.wk-grid { gap: 12px 64px; }
+.page.sb .d3-q > b { background: var(--pill); color: var(--pillink); }
+.page.sb .d3-bub { border-color: var(--pill); } .page.sb .d3-bub::after { border-top-color: var(--pill); }
+.page.sb .d3-top { border-bottom: 3px dotted var(--pill); } .page.sb .d3-tab { background: color-mix(in srgb, var(--pill) 60%, #fff); } .page.sb .d3-tab span { color: var(--pillink); } .page.sb .d3-tab i { border-color: var(--pillink); }
+.page.sb .d3-pic { border-color: color-mix(in srgb, var(--pill) 85%, #E2D3C4); }
+.page.sb div[style*="border:2px solid #9AA6B8"] { border-color: color-mix(in srgb, var(--pill) 90%, #E2D3C4) !important; }
+.page.sb .dword i, .page.sb .d3w, .page.sb .nc-name i, .page.sb .pc1-name { border-bottom-color: #A99D90 !important; }

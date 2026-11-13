@@ -53,6 +53,7 @@
     64: ['웃음 가득 우리 반 1년'],
     67: ['사라진 우유 대소동'],
     68: [].concat(...Array(4).fill(['수의사', '김가온', '아픈 동물을 치료하고 돌봐요', '고양이, 강아지'])),
+    83: ['다솜', '마루', '시온', '나래', '운동회 이어달리기', '보람', '눈 오는 날 눈싸움', '라온', '곱셈구구 7단', '새봄', '아라', '그림을 정말 잘 그려요', '줄넘기 2단 뛰기', '여름', '둘 다 고양이를 좋아해요', '친구에게 먼저 인사하기', '방학에 책 10권 읽기', '하랑', '한결', '두리'],
     82: ['가온이에게 고마운 일이 있어요.', '비 오는 날 우산을 같이 써 줬어요.', '덕분에 하나도 안 젖었어요.', '가온아, 마음까지 따뜻했어. 고마워!', '꼬마 눈사람', '김나래', '선생님께 드리는 사연이에요.', '받아쓰기를 틀려서 속상했는데', '"괜찮아, 다음에 또 하면 돼" 해 주셨어요.', '그 말 덕분에 힘이 났어요!', '우리 반 노래', '비밀'],
     69: ['넌 할 수 있어!', '천천히 꾸준히', '실수해도 괜찮아', '오늘도 반짝반짝', '용기를 내!', '새 친구 반가워', '힘내, 나!', '웃으면 복이 와'],
     74: []
@@ -92,7 +93,7 @@
     if (a.n === 62) { $$('svg circle[stroke-dasharray="4 4"]', p).forEach((c, k) => { if (k % 3 !== 2) { c.setAttribute('fill', '#FFD6DF'); c.setAttribute('stroke-dasharray', ''); c.parentNode.insertAdjacentHTML('beforeend', '<text x="30" y="37" text-anchor="middle" font-family="Miso" font-weight="700" font-size="16" fill="#C9305A">참 잘했어요</text>'.replace('참 잘했어요', '성공')); } }); }
     if (a.n === 81) { const im = $('img[src*="img/sheep/"]', p); if (im) { im.parentNode.style.position = 'relative'; im.insertAdjacentHTML('afterend', '<img class="eximg" src="img/sheep.png" alt="" style="max-width:28%;max-height:30%;left:auto;right:14px;top:auto;bottom:14px;margin:0"><span class="exw" style="position:absolute;right:16px;bottom:-4px;font-size:13px">이렇게 빨갛게 칠해요</span>'); } }
     /* 2) 글 쓰는 칸 */
-    const slots = $$('.d3-tab i, .d3w, .d3-line, .ln, table.pt td:not(.lab), .gl i, .nc-job i, .nc-name i, .nc-do i, .nc-ic i, .pc-to i, .pc-from i, .dword i, .dsay i, .drow > div > i, .dby i, .wtag .ln, .cf i, .pc1-name i, .pc1-word i, .rc-foot i, .pc1-row i, .nto i, .nt-line i, div[data-grow] > span[style*="flex:1"]', p)
+    const slots = $$('.d3-tab i, .d3w, .d3-line, .ln, table.pt td:not(.lab), .gl i, .nc-job i, .nc-name i, .nc-do i, .nc-ic i, .pc-to i, .pc-from i, .dword i, .dsay i, .drow > div > i, .dby i, .wtag .ln, .cf i, .pc1-name i, .pc1-word i, .rc-foot i, .wk-f i, .wk-ck i, .wk-sg i, .wk-f i, .wk-ck i, .wk-sg i, .pc1-row i, .nto i, .nt-line i, div[data-grow] > span[style*="flex:1"]', p)
       .filter(s => !s.querySelector('svg, img, .exw') && !s.closest('.sbl') && !(s.tagName === 'TD' && s.textContent.trim()) && !(s.matches('.nto i') && s.previousElementSibling && s.previousElementSibling.textContent.trim()));
     slots.forEach(s => { if (!lines.length) return; const t = lines.shift(); if (t) put(s, t); });
     /* 3) 그림 칸 */
