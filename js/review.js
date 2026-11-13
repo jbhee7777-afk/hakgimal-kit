@@ -106,6 +106,7 @@
       ['계절이 바뀌는 까닭으로 알맞은 것은?', '지구의 자전축이 기울어진 채 공전하기 때문', ['지구가 자전하기 때문', '달이 지구를 돌기 때문', '태양이 움직이기 때문'], 3]
     ]
   };
+  window.REVIEW_BANK = B; window.REVIEW_MATH = M;
   const band = g => g <= 2 ? 1 : g <= 4 ? 2 : 3;
   window.REVIEW_SUBJ = g => g <= 2 ? [['mix', '섞어서'], ['math', '수학'], ['kor', '국어'], ['life', '통합 교과']] : [['mix', '섞어서'], ['math', '수학'], ['kor', '국어'], ['soc', '사회'], ['sci', '과학']];
   const NAME = { math: '수학', kor: '국어', life: '통합', soc: '사회', sci: '과학' };
@@ -116,7 +117,7 @@
     if (s === 'math') { const g = M[grade][Math.min(3, level)]()(); g.s = '수학'; return g; }
     const pool = B[s].filter(x => x[3] === band(grade));
     let it, tries = 0; do { it = P(pool); tries++; } while (recent.includes(it[0] + it[1]) && tries < 20);
-    recent.push(it[0] + it[1]); if (recent.length > Math.min(8, pool.length - 1)) recent.shift();
+    recent.push(it[0] + it[1]); if (recent.length > Math.min(24, pool.length - 1)) recent.shift();
     return { q: it[0], a: it[1], o: shuffle([it[1], ...it[2]]), s: NAME[s] };
   };
   /* 분수 보기 좋게 */

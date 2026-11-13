@@ -194,7 +194,7 @@
       ctx.opts.append(field('학년', seg([1, 2, 3, 4, 5, 6].map(g => [g, g + '학년']), rv.grade, v => { rv.grade = v; Store.set('rv:grade:' + a.n, v); rv.level = 1; drawSubj(); restartMC(); })), subjBox);
       drawSubj();
       ctx.opts.append(field('시작 단계', seg([[1, '1'], [2, '2'], [3, '3']], 1, v => { rv.level = v; restartMC(); })));
-      ctx.opts.append(field('문제 수', seg([[10, '10문제'], [15, '15문제'], [20, '20문제']], rv.limit, v => { rv.limit = v; Store.set('rv:limit:' + a.n, v); restartMC(); })));
+      ctx.opts.append(field('문제 수', seg([[10, '10문제'], [15, '15문제'], [20, '20문제'], [30, '30문제']], rv.limit, v => { rv.limit = v; Store.set('rv:limit:' + a.n, v); restartMC(); })));
       ctx.opts.append(el('<p class="hint">2022 개정 교육과정 기준이에요. 수학은 학년별로 매번 새 문제가 나오고, 국어·사회·과학·통합은 학년군(1~2, 3~4, 5~6) 문제예요. 두 번 연속 맞히면 단계가 올라가요.</p>'));
       const kb = el('<button class="btn dark">선생님 정답지 인쇄</button>');
       kb.onclick = () => { if (!rv.full) nextMC(); const rows = []; [1, 2, 3].forEach(l => rv.full[l].forEach((q, k) => rows.push([`${l}단계 ${k + 1}. ${q.q}  (${q.o.map((o, m) => (m + 1) + ') ' + o).join('  ')})`, q.a]))); printPages(answerKeyPages(a, a.name, rows, `${rv.grade}학년 문제예요. 맞히면 단계가 올라가서 1·2·3단계 목록에서 차례로 나와요. 학년·과목·문제 수를 바꾸면 새 문제가 만들어지니 바꾼 뒤에 인쇄하세요.`, 12)); };
