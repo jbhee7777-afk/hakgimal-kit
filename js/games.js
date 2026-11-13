@@ -8,13 +8,20 @@
 
   /* ── 선생님 정답지 (미리 인쇄해 두기) ── */
   const plain = h => { const d = document.createElement('div'); d.innerHTML = String(h).replace(/<br\s*\/?>/gi, ' / ').replace(/<\/(td|th)>/gi, ' ').replace(/<\/tr>/gi, ' / '); return d.textContent.replace(/\s+/g, ' ').replace(/( \/)+\s*$/, '').trim(); };
-  window.answerKeyPages = function (a, title, rows, note, per) {
-    per = per || 16; const out = [];
-    for (let k = 0; k < Math.max(1, rows.length); k += per) {
-      const p = pageFrame(a, title + ' · 선생님 정답지', note || '화면에 나오는 순서 그대로예요. 아이들에게 보이지 않게 보관해요.', { noName: true });
-      p.insertAdjacentHTML('beforeend', `<table data-nofill class="akey"><thead><tr><th style="width:56px">번호</th><th>문제</th><th style="width:30%">정답</th></tr></thead><tbody>${rows.slice(k, k + per).map((r, j) => `<tr><td class="n">${k + j + 1}</td><td>${esc(plain(r[0]))}</td><td class="a">${esc(plain(r[1]))}</td></tr>`).join('')}</tbody></table>`);
-      out.push(p);
-    }
+  window.answerKeyPages = function (a, title, rows, note) {
+    /* 줄 수가 아니라 실제 높이를 재서, 쪽 아래가 잘리지 않게 나눠요 */
+    const out = [], host = el('<div style="position:fixed;left:-99999px;top:0;width:794px"></div>'); document.body.appendChild(host);
+    const newPage = () => { const p = pageFrame(a, title + ' · 선생님 정답지', note || '화면에 나오는 순서 그대로예요. 아이들에게 보이지 않게 보관해요.', { noName: true }); p.insertAdjacentHTML('beforeend', '<table data-nofill class="akey"><thead><tr><th style="width:56px">번호</th><th>문제</th><th style="width:30%">정답</th></tr></thead><tbody></tbody></table>'); host.appendChild(p); return p; };
+    const full = p => { const pr = p.getBoundingClientRect(), tr = $('table.akey', p).getBoundingClientRect(); return tr.bottom > pr.bottom - 84; };
+    let p = newPage(), tb = $('tbody', p);
+    rows.forEach((r, j) => {
+      const row = el(`<table><tr><td class="n">${j + 1}</td><td>${esc(plain(r[0]))}</td><td class="a">${esc(plain(r[1]))}</td></tr></table>`).querySelector('tr');
+      tb.appendChild(row);
+      if (full(p) && tb.children.length > 1) { row.remove(); out.push(p); p = newPage(); tb = $('tbody', p); tb.appendChild(row); }
+    });
+    out.push(p);
+    out.forEach((pg, k) => { if (out.length > 1) $('.ph .pnum', pg).insertAdjacentText('beforeend', ` · ${k + 1}/${out.length}쪽`); pg.remove(); });
+    host.remove();
     return out;
   };
   window.plainText = plain;
